@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@testsprite/testsprite-mcp": "^0.0.18",
     "chart.js": "^4.5.1",
     "chartjs-plugin-zoom": "^2.2.0",
     "mqtt": "^5.14.1",

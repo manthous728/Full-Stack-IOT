@@ -29,7 +29,7 @@ DB_IOT = {
     "port": 5432,
     "dbname": IOT_DB,
     "user": "postgres",
-    "password": "root"
+    "password": "postgres"
 }
 
 try:

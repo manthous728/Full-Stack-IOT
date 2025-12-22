@@ -4,7 +4,7 @@ DB_DEFAULT = {
     "port": 5432,
     "dbname": "postgres",
     "user": "postgres",
-    "password": "root"
+    "password": "postgres"
 }
 
 # MQTT Configuration

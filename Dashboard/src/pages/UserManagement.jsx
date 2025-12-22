@@ -40,17 +40,77 @@ export default function UserManagement() {
         }
     }
 
-    const handleDelete = async (userId) => {
-        if (!window.confirm('Yakin ingin menghapus user ini?')) return
+    // Confirm Modal States
+    const [deleteModal, setDeleteModal] = useState({ show: false, userId: null })
+    const [resetConfirmModal, setResetConfirmModal] = useState({ show: false, userId: null, username: '' })
+
+    // Action Handlers (Membuka Modal)
+    const openDeleteModal = (userId) => {
+        const id = Number(userId)
+        if (id === 1) {
+            alert('User dengan ID 1 tidak dapat dihapus!')
+            return
+        }
+        setDeleteModal({ show: true, userId: id })
+    }
+
+    const openResetModal = (userId, username) => {
+        const id = Number(userId)
+        if (id === 1) {
+            alert('Password user dengan ID 1 (Admin Utama) tidak dapat di-reset!')
+            return
+        }
+        setResetConfirmModal({ show: true, userId: id, username })
+    }
+
+    // Execution Handlers (Dipanggil dari Modal)
+    const confirmDelete = async () => {
+        const id = deleteModal.userId
+        setDeleteModal({ show: false, userId: null }) // Tutup modal dulu
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
-                method: 'DELETE'
+            console.log(`Sending delete request for user ${id}...`)
+            const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
             })
-            if (!response.ok) throw new Error('Gagal menghapus user')
-            fetchUsers() // Refresh list
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Gagal menghapus user')
+            }
+
+            console.log('Delete success')
+            alert('User berhasil dihapus!')
+            fetchUsers()
         } catch (err) {
-            alert(err.message)
+            console.error('Delete error:', err)
+            alert('Error: ' + err.message)
+        }
+    }
+
+    const confirmReset = async () => {
+        const { userId: id, username } = resetConfirmModal
+        setResetConfirmModal({ show: false, userId: null, username: '' }) // Tutup modal
+
+        try {
+            console.log(`Sending reset request for user ${id}...`)
+            const response = await fetch(`${API_BASE_URL}/admin/users/${id}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Gagal reset password')
+            }
+
+            console.log('Reset success')
+            setResetModal({ show: true, username, tempPassword: data.temporary_password })
+        } catch (err) {
+            console.error('Reset error:', err)
+            alert('Error: ' + err.message)
         }
     }
 
@@ -96,23 +156,6 @@ export default function UserManagement() {
     }
 
     const [resetModal, setResetModal] = useState({ show: false, username: '', tempPassword: '' })
-
-    const handleResetPassword = async (userId, username) => {
-        if (!window.confirm(`Reset password untuk user "${username}"?`)) return
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/reset-password`, {
-                method: 'POST'
-            })
-            const data = await response.json()
-
-            if (!response.ok) throw new Error(data.detail || 'Gagal reset password')
-
-            setResetModal({ show: true, username, tempPassword: data.temporary_password })
-        } catch (err) {
-            alert(err.message)
-        }
-    }
 
     if (!isAdmin) {
         return (
@@ -177,21 +220,35 @@ export default function UserManagement() {
                                         {new Date(u.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => handleResetPassword(u.id, u.username)}
-                                            className="text-amber-600 hover:text-amber-900 mr-4"
-                                            title="Reset Password"
-                                        >
-                                            Reset
-                                        </button>
-                                        {u.id !== user?.id && (
-                                            <button
-                                                onClick={() => handleDelete(u.id)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                Hapus
-                                            </button>
-                                        )}
+                                        <div className="flex items-center justify-end gap-3">
+                                            {u.id !== 1 ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openResetModal(u.id, u.username)}
+                                                    className="px-3 py-1 text-amber-600 hover:text-amber-900 hover:bg-amber-50 rounded transition-colors"
+                                                    title="Reset Password"
+                                                >
+                                                    Reset
+                                                </button>
+                                            ) : (
+                                                <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="Password Admin Utama tidak dapat di-reset">
+                                                    Reset
+                                                </span>
+                                            )}
+                                            {u.id !== 1 ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openDeleteModal(u.id)}
+                                                    className="px-3 py-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            ) : (
+                                                <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="User utama tidak dapat dihapus">
+                                                    Hapus
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -280,6 +337,65 @@ export default function UserManagement() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                </div>
+            )}
+
+            {deleteModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Hapus User?</h3>
+                        <p className="text-slate-600 text-center mb-6">User yang dihapus tidak dapat dikembalikan lagi. Pastikan Anda yakin.</p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteModal({ show: false, userId: null })}
+                                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            >
+                                Ya, Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {resetConfirmModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+                        <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-1.114 3.796M15 7a2 2 0 00-1.114-1.5m4 4.5A2 2 0 0019 9a2 2 0 00-2 2M15 7a2 2 0 00-1.114 1.5M13 3v2m0 0a2 2 0 01-2-2m2 2a2 2 0 002-2m-2 2l-2-2m2 2l2-2" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Reset Password?</h3>
+                        <p className="text-slate-600 text-center mb-6">Password untuk user <strong>{resetConfirmModal.username}</strong> akan di-reset dan diganti dengan password acak baru.</p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setResetConfirmModal({ show: false, userId: null, username: '' })}
+                                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmReset}
+                                className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                            >
+                                Ya, Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

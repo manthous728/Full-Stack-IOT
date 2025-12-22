@@ -311,6 +311,10 @@ def delete_user(user_id: int):
 @app.post("/admin/users/{user_id}/reset-password")
 def reset_password(user_id: int):
     """Reset user password by Admin (auto-generated)"""
+    # Proteksi: User ID 1 tidak boleh di-reset password-nya
+    if user_id == 1:
+        raise HTTPException(403, "Password Admin Utama (ID 1) tidak dapat di-reset")
+    
     import random
     import string
     

@@ -3,5 +3,5 @@ DB = {
     "port": 5432,
     "dbname": "iotdb",
     "user": "postgres",
-    "password": "root"
+    "password": "postgres"
 }
