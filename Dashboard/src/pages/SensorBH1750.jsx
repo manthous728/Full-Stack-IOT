@@ -339,7 +339,7 @@ export default function SensorBH1750() {
             <select
               value={historyRange}
               onChange={(e) => setHistoryRange(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full p-2 border border-slate-100/50 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             >
               {TIME_RANGES.map((range) => (
                 <option key={range.value} value={range.value}>
@@ -350,12 +350,12 @@ export default function SensorBH1750() {
           </div>
 
           {/* Desktop Buttons */}
-          <div className="hidden md:flex bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+          <div className="hidden md:flex bg-white border border-slate-100/50 rounded-md shadow-sm overflow-hidden">
             {TIME_RANGES.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setHistoryRange(range.value)}
-                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
+                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100/50 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
                   }`}
               >
                 {range.label}
@@ -367,7 +367,7 @@ export default function SensorBH1750() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div
-          className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+          className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-slate-500">Intensitas Cahaya</p>
@@ -387,7 +387,7 @@ export default function SensorBH1750() {
           )}
         </div>
         <div
-          className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+          className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
           onClick={() => setShowLuxLevelModal(true)}
         >
           <div className="flex items-center justify-between">
@@ -410,7 +410,7 @@ export default function SensorBH1750() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-slate-800">
             {viewMode === 'realtime' ? 'Intensitas Cahaya' : 'Grafik Riwayat Cahaya'}
@@ -443,7 +443,7 @@ export default function SensorBH1750() {
       {showLuxLevelModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowLuxLevelModal(false)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white p-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="sticky top-0 bg-white p-4 border-b border-slate-100/50 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-800">Referensi Tingkat Lux</h3>
               <button
                 onClick={() => setShowLuxLevelModal(false)}

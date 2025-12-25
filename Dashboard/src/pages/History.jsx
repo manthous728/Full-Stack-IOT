@@ -90,7 +90,7 @@ export default function History() {
             {mobileMenuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setMobileMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-20">
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100/50 py-2 z-20">
                   <button
                     onClick={exportExcelLog}
                     disabled={history.length === 0}
@@ -120,7 +120,7 @@ export default function History() {
 
       <div className="space-y-4">
         {/* Desktop Table View */}
-        <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-100/50 overflow-hidden">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
@@ -163,7 +163,7 @@ export default function History() {
         {/* Mobile Card View */}
         <div className="md:hidden space-y-3">
           {history.length === 0 ? (
-            <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500 shadow-sm">
+            <div className="bg-white p-8 rounded-xl border border-slate-100/50 text-center text-slate-500 shadow-sm">
               <svg className="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -171,7 +171,7 @@ export default function History() {
             </div>
           ) : (
             history.map((item, idx) => (
-              <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2 border-l-4" style={{ borderColor: item.statusClass?.includes('text-green') ? '#10b981' : item.statusClass?.includes('text-red') ? '#ef4444' : item.statusClass?.includes('text-yellow') ? '#f59e0b' : '#94a3b8' }}>
+              <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100/50 shadow-sm space-y-2 border-l-4" style={{ borderColor: item.statusClass?.includes('text-green') ? '#10b981' : item.statusClass?.includes('text-red') ? '#ef4444' : item.statusClass?.includes('text-yellow') ? '#f59e0b' : '#94a3b8' }}>
                 <div className="flex justify-between items-start">
                   <h3 className="font-bold text-slate-800 text-sm leading-tight">{item.event}</h3>
                   <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${item.status.toLowerCase().includes('connect') ? 'bg-green-500' :

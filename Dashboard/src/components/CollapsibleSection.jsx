@@ -1,5 +1,5 @@
 const CollapsibleSection = ({ title, isOpen, onToggle, color, children }) => (
-    <div className="mb-4 border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm transition-all md:mb-6">
+    <div className="mb-4 border border-slate-100/50 rounded-lg overflow-hidden bg-white shadow-sm transition-all md:mb-6">
         <button
             type="button"
             onClick={onToggle}
@@ -22,7 +22,7 @@ const CollapsibleSection = ({ title, isOpen, onToggle, color, children }) => (
         <div
             className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
         >
-            <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div className="p-4 border-t border-slate-100/50 bg-slate-50/50">
                 {children}
             </div>
         </div>

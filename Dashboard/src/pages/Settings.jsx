@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config";
 
 const CollapsibleSection = ({ title, isOpen, onToggle, color, children }) => (
-  <div className="mb-4 border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm transition-all md:mb-6">
+  <div className="mb-4 border border-slate-100/50 rounded-lg overflow-hidden bg-white shadow-sm transition-all md:mb-6">
     <button
       type="button"
       onClick={onToggle}
@@ -27,7 +27,7 @@ const CollapsibleSection = ({ title, isOpen, onToggle, color, children }) => (
     <div
       className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
     >
-      <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+      <div className="p-4 border-t border-slate-100/50 bg-slate-50/50">
         {children}
       </div>
     </div>
@@ -247,8 +247,8 @@ export default function Settings() {
     setSaved(true);
     setTimeout(() => {
       setSaved(false);
-      connect();
-    }, 1500);
+      window.location.reload();
+    }, 800);
   };
 
   const handleThresholdSubmit = async (e) => {
@@ -286,7 +286,10 @@ export default function Settings() {
           });
           setSavedType("threshold");
           setSaved(true);
-          setTimeout(() => setSaved(false), 2000);
+          setTimeout(() => {
+            setSaved(false);
+            window.location.reload();
+          }, 800);
         }
       } else {
         const errData = await res.json();
@@ -330,7 +333,10 @@ export default function Settings() {
           });
           setSavedType("threshold");
           setSaved(true);
-          setTimeout(() => setSaved(false), 2000);
+          setTimeout(() => {
+            setSaved(false);
+            window.location.reload();
+          }, 800);
         }
       }
     } catch (err) {
@@ -397,7 +403,10 @@ export default function Settings() {
 
         setSavedType("profile");
         setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
+        setTimeout(() => {
+          setSaved(false);
+          window.location.reload();
+        }, 800);
 
         setProfileData({ ...profileData, currentPassword: "", newPassword: "", confirmPassword: "" });
         setSelectedFile(null);
@@ -454,7 +463,7 @@ export default function Settings() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-6 border-b border-slate-200 overflow-x-auto">
+      <div className="flex gap-2 mb-6 border-b border-slate-100/50 overflow-x-auto">
         {isAdmin && (
           <>
             <button
@@ -529,7 +538,7 @@ export default function Settings() {
 
       {/* Broker Settings Tab */}
       {activeTab === "broker" && (
-        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
           <form className="space-y-6" onSubmit={handleBrokerSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -544,7 +553,7 @@ export default function Settings() {
                   onChange={handleBrokerChange}
                   placeholder="contoh: broker.hivemq.com"
                   required
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                 />
                 <p className="mt-1 text-xs text-slate-500">
                   Alamat host MQTT broker
@@ -564,7 +573,7 @@ export default function Settings() {
                   min="1"
                   max="65535"
                   required
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                 />
                 <p className="mt-1 text-xs text-slate-500">
                   Port MQTT broker (default: 8884 untuk WSS)
@@ -585,7 +594,7 @@ export default function Settings() {
                 min="1"
                 max="3600"
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
               />
               <p className="mt-1 text-xs text-slate-500">
                 Interval update data dalam detik (1-3600)
@@ -600,7 +609,7 @@ export default function Settings() {
 
             {saved && savedType === "broker" && (
               <div className="p-3 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                Pengaturan broker berhasil disimpan! Menghubungkan ulang ke broker...
+                Pengaturan broker berhasil disimpan! Reloading...
               </div>
             )}
 
@@ -608,7 +617,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={handleBrokerReset}
-                className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+                className="px-6 py-3 border border-slate-100/50 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Reset Default
               </button>
@@ -625,7 +634,7 @@ export default function Settings() {
 
       {/* Threshold Settings Tab */}
       {activeTab === "threshold" && (
-        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
           {isLoadingSettings ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -643,7 +652,7 @@ export default function Settings() {
                 </p>
 
                 {/* Master Toggle */}
-                <div className="mb-6 p-4 bg-slate-50 rounded-lg flex items-center justify-between border border-slate-200">
+                <div className="mb-6 p-4 bg-slate-50 rounded-lg flex items-center justify-between border border-slate-100/50">
                   <div>
                     <h4 className="text-sm font-semibold text-slate-700">Notifikasi Sistem</h4>
                     <p className="text-xs text-slate-500 mt-1">
@@ -657,7 +666,7 @@ export default function Settings() {
                       checked={thresholdData.enableThresholds}
                       onChange={(e) => setThresholdData(prev => ({ ...prev, enableThresholds: e.target.checked }))}
                     />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-100/50 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
                 </div>
 
@@ -692,7 +701,7 @@ export default function Settings() {
                             telegramConfig: { ...prev.telegramConfig, enabled: e.target.checked }
                           }))}
                         />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-100/50 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                       </label>
                     </div>
 
@@ -709,7 +718,7 @@ export default function Settings() {
                               ...prev,
                               telegramConfig: { ...prev.telegramConfig, bot_token: e.target.value }
                             }))}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
+                            className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
                             placeholder="123456789:ABCdefGhIJKlmNoPQRstuVWxyz"
                           />
                         </div>
@@ -725,7 +734,7 @@ export default function Settings() {
                                 ...prev,
                                 telegramConfig: { ...prev.telegramConfig, chat_id: e.target.value }
                               }))}
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
+                              className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors text-sm"
                               placeholder="12345678"
                             />
                             <button
@@ -770,7 +779,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 35"
                         />
                       </div>
@@ -788,7 +797,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 15"
                         />
                       </div>
@@ -802,7 +811,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("dht22", "humMax", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 80"
                         />
                       </div>
@@ -816,7 +825,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("dht22", "humMin", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 30"
                         />
                       </div>
@@ -847,7 +856,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 350"
                         />
                       </div>
@@ -861,7 +870,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("mq2", "smokeMax", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 500"
                         />
                       </div>
@@ -880,7 +889,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("mq2", "lpgWarn", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 500"
                         />
                       </div>
@@ -894,7 +903,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("mq2", "lpgMax", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 1000"
                         />
                       </div>
@@ -913,7 +922,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("mq2", "coWarn", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 200"
                         />
                       </div>
@@ -927,7 +936,7 @@ export default function Settings() {
                           onChange={(e) =>
                             handleThresholdChange("mq2", "coMax", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 500"
                         />
                       </div>
@@ -956,7 +965,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 2000"
                         />
                       </div>
@@ -974,7 +983,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 180"
                         />
                       </div>
@@ -992,7 +1001,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 240"
                         />
                       </div>
@@ -1013,7 +1022,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 10"
                         />
                       </div>
@@ -1031,7 +1040,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 100"
                         />
                       </div>
@@ -1050,7 +1059,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 0.85"
                         />
                       </div>
@@ -1079,7 +1088,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 0"
                         />
                       </div>
@@ -1097,7 +1106,7 @@ export default function Settings() {
                               e.target.value
                             )
                           }
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                          className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                           placeholder="contoh: 100000"
                         />
                       </div>
@@ -1128,22 +1137,26 @@ export default function Settings() {
 
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  type="button"
-                  onClick={() => setShowThresholdResetModal(true)}
-                  disabled={isSavingSettings}
-                  className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
-                >
-                  Reset Default
-                </button>
-                <button
                   type="submit"
                   disabled={isSavingSettings}
                   className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition-colors shadow-sm hover:shadow-md disabled:opacity-50 flex items-center"
                 >
-                  {isSavingSettings && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {isSavingSettings ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
                   )}
-                  Simpan Threshold
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowThresholdResetModal(true)}
+                  disabled={isSavingSettings}
+                  className="px-6 py-3 border border-slate-100/50 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  Reset Default
                 </button>
               </div>
             </form>
@@ -1155,8 +1168,8 @@ export default function Settings() {
       {/* Profile Settings Tab */}
       {
         activeTab === "profile" && (
-          <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
-            <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
+            <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-100/50">
               <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center md:text-left">Foto Profil</h3>
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
@@ -1204,7 +1217,7 @@ export default function Settings() {
                   type="text"
                   value={profileData.newUsername}
                   onChange={handleProfileChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                   placeholder="Masukkan username baru"
                 />
               </div>
@@ -1218,7 +1231,7 @@ export default function Settings() {
                   type="password"
                   value={profileData.newPassword}
                   onChange={handleProfileChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                   placeholder="Kosongkan jika tidak ingin mengubah password"
                 />
               </div>
@@ -1232,12 +1245,12 @@ export default function Settings() {
                   type="password"
                   value={profileData.confirmPassword}
                   onChange={handleProfileChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                   placeholder="Ulangi password baru"
                 />
               </div>
 
-              <hr className="border-slate-200 my-6" />
+              <hr className="border-slate-100/50 my-6" />
 
               <div className="md:w-2/3">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -1248,7 +1261,7 @@ export default function Settings() {
                   type="password"
                   value={profileData.currentPassword}
                   onChange={handleProfileChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                  className="w-full px-4 py-3 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
                   placeholder="Masukkan password saat ini untuk konfirmasi"
                   required
                 />

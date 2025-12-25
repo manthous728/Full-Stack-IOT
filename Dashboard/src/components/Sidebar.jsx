@@ -140,7 +140,7 @@ function ProfileSection({ isCollapsed, onClose }) {
             onClick={() => setProfileOpen(false)}
           />
           <div
-            className={`absolute bottom-full left-0 right-0 mb-2 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden z-20 ${isCollapsed ? "md:left-0 md:right-auto md:w-48" : ""
+            className={`absolute bottom-full left-0 right-0 mb-2 bg-slate-800 rounded-lg shadow-xl border border-slate-800 overflow-hidden z-20 ${isCollapsed ? "md:left-0 md:right-auto md:w-48" : ""
               }`}
           >
             <button
@@ -200,7 +200,7 @@ export default function Sidebar({
         <div className="md:hidden mt-3">
           <h1 className="text-2xl font-bold text-white">Control Panel</h1>
           <p className="text-sm text-slate-400">v1.0</p>
-          <div className="border-b border-slate-700 mt-3"></div>
+          <div className="border-b border-slate-800 mt-3"></div>
         </div>
 
         {/* Desktop header */}
@@ -245,7 +245,7 @@ export default function Sidebar({
                 <p className="text-xs text-slate-400">v1.0</p>
               </div>
             </div>
-            <div className="border-b border-slate-700 mt-4"></div>
+            <div className="border-b border-slate-800 mt-4"></div>
           </div>
         )}
       </div>
@@ -405,7 +405,7 @@ export default function Sidebar({
       </nav>
 
       <div
-        className={`mt-auto border-t border-slate-700 p-4 space-y-3 ${isCollapsed ? "md:p-2 md:space-y-2" : "md:p-4 md:space-y-3"
+        className={`mt-auto border-t border-slate-800 p-4 space-y-3 ${isCollapsed ? "md:p-2 md:space-y-2" : "md:p-4 md:space-y-3"
           }`}
       >
         {/* Profile Section */}
@@ -415,7 +415,7 @@ export default function Sidebar({
           className={`text-xs text-slate-500 text-center ${isCollapsed ? "md:hidden" : ""
             }`}
         >
-          &copy; 2025 Dashboard by Unknown
+          &copy; 2025 Dashboard by Anomali
         </div>
       </div>
     </aside>

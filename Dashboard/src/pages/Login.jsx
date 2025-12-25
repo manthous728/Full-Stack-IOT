@@ -101,7 +101,7 @@ export default function Login() {
                     required
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all hover:bg-slate-800/70"
+                    className="w-full px-5 py-3.5 bg-slate-800/50 border-2 border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all hover:bg-slate-800/70"
                     placeholder="Masukkan username"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">
@@ -121,7 +121,7 @@ export default function Login() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-5 py-3.5 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all hover:bg-slate-800/70"
+                    className="w-full px-5 py-3.5 bg-slate-800/50 border-2 border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition-all hover:bg-slate-800/70"
                     placeholder="Masukkan password"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">

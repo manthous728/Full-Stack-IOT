@@ -320,7 +320,7 @@ export default function SensorPZEM() {
             <select
               value={historyRange}
               onChange={(e) => setHistoryRange(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full p-2 border border-slate-100/50 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             >
               {TIME_RANGES.map((range) => (
                 <option key={range.value} value={range.value}>
@@ -331,12 +331,12 @@ export default function SensorPZEM() {
           </div>
 
           {/* Desktop Buttons */}
-          <div className="hidden md:flex bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+          <div className="hidden md:flex bg-white border border-slate-100/50 rounded-md shadow-sm overflow-hidden">
             {TIME_RANGES.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setHistoryRange(range.value)}
-                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
+                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100/50 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
                   }`}
               >
                 {range.label}
@@ -348,29 +348,29 @@ export default function SensorPZEM() {
 
       {/* STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <p className="text-sm font-medium text-slate-500">Power</p>
           <h3 className="text-3xl font-bold text-teal-500">{viewMode === 'realtime' ? `${latestPower} W` : (historyStats?.power_avg ? `${Number(historyStats.power_avg).toFixed(1)} W` : '--')}</h3>
           <HistoryStats stats={viewMode === 'realtime' ? formatLocalStats(realtimeStatsPower, 'power') : historyStats} label="power" unit="W" color="teal" isRealtime={viewMode === 'realtime'} />
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <p className="text-sm font-medium text-slate-500">Voltage</p>
           <h3 className="text-3xl font-bold text-slate-500">{viewMode === 'realtime' ? `${latestVoltage} V` : (historyStats?.voltage_avg ? `${Number(historyStats.voltage_avg).toFixed(1)} V` : '--')}</h3>
           <HistoryStats stats={viewMode === 'realtime' ? formatLocalStats(realtimeStatsVoltage, 'voltage') : historyStats} label="voltage" unit="V" color="slate" isRealtime={viewMode === 'realtime'} />
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <p className="text-sm font-medium text-slate-500">Current</p>
           <h3 className="text-3xl font-bold text-orange-500">{viewMode === 'realtime' ? `${latestCurrent} A` : (historyStats?.current_avg ? `${Number(historyStats.current_avg).toFixed(2)} A` : '--')}</h3>
           <HistoryStats stats={viewMode === 'realtime' ? formatLocalStats(realtimeStatsCurrent, 'current') : historyStats} label="current" unit="A" color="orange" isRealtime={viewMode === 'realtime'} />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <p className="text-sm font-medium text-slate-500">Energy</p>
           <h3 className="text-3xl font-bold text-indigo-500">{viewMode === 'realtime' ? `${latestEnergy} kWh` : (historyStats?.energy_avg ? `${Number(historyStats.energy_avg).toFixed(3)} kWh` : '--')}</h3>
           <HistoryStats stats={viewMode === 'realtime' ? formatLocalStats(realtimeStatsEnergy, 'energy') : historyStats} label="energy" unit="kWh" color="blue" isRealtime={viewMode === 'realtime'} />
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <p className="text-sm font-medium text-slate-500">Power Factor</p>
           <h3 className="text-3xl font-bold text-purple-500">{viewMode === 'realtime' ? latestPF : (historyStats?.power_factor_avg ? Number(historyStats.power_factor_avg).toFixed(2) : '--')}</h3>
           <HistoryStats stats={viewMode === 'realtime' ? formatLocalStats(realtimeStatsPF, 'power_factor') : historyStats} label="power_factor" unit="" color="purple" isRealtime={viewMode === 'realtime'} />
@@ -399,7 +399,7 @@ export default function SensorPZEM() {
 
 function ChartCard({ title, data, options, loading, viewMode }) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
         {viewMode === 'realtime' && (

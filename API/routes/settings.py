@@ -3,12 +3,20 @@ Settings Router - App settings & notifications endpoints
 """
 import json
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from database import get_cursor
 from models import SettingsUpdate, TelegramTest
 from utils import DEFAULT_THRESHOLDS
 
 router = APIRouter(tags=["Settings"])
+
+
+def _do_send_telegram(url: str, payload: dict):
+    """Internal helper to send telegram message without blocking API thread"""
+    try:
+        requests.post(url, json=payload, timeout=5)
+    except Exception as e:
+        print(f"Background Telegram Error: {e}")
 
 
 @router.get("/settings")
@@ -64,21 +72,33 @@ def update_settings(settings_data: SettingsUpdate):
             mq = thresholds['mq2']
             if mq.get('smokeWarn') is not None and mq.get('smokeMax') is not None:
                 if mq['smokeWarn'] > mq['smokeMax']:
-                    errors.append("Smoke Waspada tidak boleh lebih besar dari Smoke Bahaya")
+                    errors.append("MQ2: Smoke Waspada (> Bahaya)")
+            if mq.get('lpgWarn') is not None and mq.get('lpgMax') is not None:
+                if mq['lpgWarn'] > mq['lpgMax']:
+                    errors.append("MQ2: LPG Waspada (> Bahaya)")
+            if mq.get('coWarn') is not None and mq.get('coMax') is not None:
+                if mq['coWarn'] > mq['coMax']:
+                    errors.append("MQ2: CO Waspada (> Bahaya)")
         
         # PZEM004T validation
         if 'pzem004t' in thresholds:
             pz = thresholds['pzem004t']
             if pz.get('voltageMin') is not None and pz.get('voltageMax') is not None:
                 if pz['voltageMin'] > pz['voltageMax']:
-                    errors.append("Tegangan Min tidak boleh lebih besar dari Tegangan Max")
+                    errors.append("PZEM: Tegangan Min (> Max)")
+            if pz.get('currentMax') is not None and pz['currentMax'] < 0:
+                errors.append("PZEM: Arus Max tidak boleh negatif")
+            if pz.get('energyMax') is not None and pz['energyMax'] < 0:
+                errors.append("PZEM: Energi Max tidak boleh negatif")
+            if pz.get('pfMin') is not None and (pz['pfMin'] < 0 or pz['pfMin'] > 1):
+                errors.append("PZEM: Power Factor harus antara 0 Sampai 1")
         
         # BH1750 validation
         if 'bh1750' in thresholds:
             bh = thresholds['bh1750']
             if bh.get('luxMin') is not None and bh.get('luxMax') is not None:
                 if bh['luxMin'] > bh['luxMax']:
-                    errors.append("Cahaya Min tidak boleh lebih besar dari Cahaya Max")
+                    errors.append("BH1750: Cahaya Min (> Max)")
         
         if errors:
             raise HTTPException(400, "; ".join(errors))
@@ -165,7 +185,7 @@ def reset_settings():
 
 
 @router.post("/notify/telegram/test")
-def test_telegram(data: TelegramTest):
+def test_telegram(data: TelegramTest, background_tasks: BackgroundTasks):
     """Test send Telegram message"""
     try:
         url = f"https://api.telegram.org/bot{data.bot_token}/sendMessage"
@@ -181,53 +201,55 @@ def test_telegram(data: TelegramTest):
             "text": message,
             "parse_mode": "Markdown"
         }
-        res = requests.post(url, json=payload, timeout=5)
-        if res.status_code == 200:
-            return {"success": True, "message": "Pesan terkirim!"}
-        else:
-            return {"success": False, "message": f"Gagal: {res.text}"}
+        
+        # Use background task to avoid blocking
+        background_tasks.add_task(_do_send_telegram, url, payload)
+        
+        return {"success": True, "message": "Permintaan tes terkirim ke antrean background."}
     except Exception as e:
-        raise HTTPException(500, f"Error sending message: {e}")
+        raise HTTPException(500, f"Error queuing message: {e}")
+
+
 @router.post("/notify/telegram/send")
-def send_telegram_alert(data: dict):
+def send_telegram_alert(data: dict, background_tasks: BackgroundTasks):
     """Send generic Telegram alert using stored configuration"""
     try:
         message = data.get("message")
         if not message:
              raise HTTPException(400, "Message is required")
 
-        # Get config from DB
+        tg_config = None
+        # Get config from DB and release connection ASAP
         with get_cursor() as cur:
             cur.execute("SELECT setting_value FROM app_settings WHERE setting_key = 'telegram_config'")
             res = cur.fetchone()
-            if not res:
-                return {"success": False, "message": "Telegram config not found"}
+            if res:
+                tg_config = res['setting_value']
             
-            tg_config = res['setting_value']
+        if not tg_config:
+            return {"success": False, "message": "Telegram config not found"}
             
-            if not tg_config.get("enabled"):
-                return {"success": False, "message": "Telegram disabled"}
-                
-            token = tg_config.get("bot_token")
-            chat_id = tg_config.get("chat_id")
+        if not tg_config.get("enabled"):
+            return {"success": False, "message": "Telegram disabled"}
             
-            if not token or not chat_id:
-                return {"success": False, "message": "Incomplete Telegram config"}
+        token = tg_config.get("bot_token")
+        chat_id = tg_config.get("chat_id")
+        
+        if not token or not chat_id:
+            return {"success": False, "message": "Incomplete Telegram config"}
 
-            url = f"https://api.telegram.org/bot{token}/sendMessage"
-            payload = {
-                "chat_id": chat_id,
-                "text": message,
-                "parse_mode": "Markdown"
-            }
-            
-            resp = requests.post(url, json=payload, timeout=5)
-            if resp.status_code == 200:
-                return {"success": True, "message": "Alert sent"}
-            else:
-                print(f"Telegram Fail: {resp.text}")
-                return {"success": False, "message": "Failed to send to Telegram"}
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "Markdown"
+        }
+        
+        # Dispatch to background
+        background_tasks.add_task(_do_send_telegram, url, payload)
+        
+        return {"success": True, "message": "Alert queued"}
                 
     except Exception as e:
-        print(f"Error sending alert: {e}")
+        print(f"Error queuing alert: {e}")
         raise HTTPException(500, str(e))

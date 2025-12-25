@@ -219,12 +219,12 @@ export default function SensorHistory() {
     return (
         <div className="space-y-6">
             {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100/50">
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <select
                         value={selectedSensor}
                         onChange={(e) => setSelectedSensor(e.target.value)}
-                        className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                        className="px-4 py-2 bg-slate-50 border border-slate-100/50 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                     >
                         {SENSORS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
@@ -232,7 +232,7 @@ export default function SensorHistory() {
                     <select
                         value={selectedRange}
                         onChange={(e) => setSelectedRange(e.target.value)}
-                        className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                        className="px-4 py-2 bg-slate-50 border border-slate-100/50 rounded-lg text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                     >
                         {RANGES.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                     </select>
@@ -262,7 +262,7 @@ export default function SensorHistory() {
             )}
 
             {!loading && !error && historyData.length === 0 && (
-                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-100/50">
                     Tidak ada data untuk rentang waktu ini.
                 </div>
             )}
@@ -299,7 +299,7 @@ export default function SensorHistory() {
                     )}
 
                     {/* Chart */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 h-[400px]">
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100/50 h-[400px]">
                         {chartData && <Line options={chartOptions} data={chartData} />}
                     </div>
 

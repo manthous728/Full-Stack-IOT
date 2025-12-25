@@ -4,9 +4,9 @@ import { API_BASE_URL } from "../config";
 import CollapsibleSection from "../components/CollapsibleSection";
 
 export default function ThresholdSettings() {
-    const { settings, updateSettings, DEFAULT_SETTINGS } = useMqtt();
+    const { settings, updateSettings, DEFAULT_SETTINGS, sensorData } = useMqtt();
     const [thresholdData, setThresholdData] = useState({
-        thresholds: settings.thresholds || DEFAULT_SETTINGS.thresholds,
+        thresholds: settings.thresholds || DEFAULT_SETTINGS.thresholds || {},
         enableThresholds: settings.enableThresholds !== undefined ? settings.enableThresholds : true,
         telegramConfig: settings.telegramConfig || { bot_token: "", chat_id: "", enabled: false },
     });
@@ -40,9 +40,12 @@ export default function ThresholdSettings() {
             const res = await fetch(`${API_BASE_URL}/settings`);
             if (res.ok) {
                 const data = await res.json();
-                if (data.success && data.settings?.thresholds) {
+                if (data.success && data.settings) {
                     const fetchedData = {
-                        thresholds: data.settings.thresholds,
+                        thresholds: {
+                            ...(DEFAULT_SETTINGS.thresholds || {}),
+                            ...(data.settings.thresholds || {})
+                        },
                         enableThresholds: data.settings.enable_thresholds ?? true,
                         telegramConfig: data.settings.telegram_config || { bot_token: "", chat_id: "", enabled: false }
                     };
@@ -74,12 +77,20 @@ export default function ThresholdSettings() {
         const t = thresholdData.thresholds;
         const errors = [];
         if (t.dht22) {
-            if (t.dht22.tempMin !== "" && t.dht22.tempMax !== "" && t.dht22.tempMin > t.dht22.tempMax) errors.push("Suhu Min > Suhu Max");
-            if (t.dht22.humMin !== "" && t.dht22.humMax !== "" && t.dht22.humMin > t.dht22.humMax) errors.push("Kelembaban Min > Kelembaban Max");
+            if (t.dht22.tempMin !== "" && t.dht22.tempMax !== "" && Number(t.dht22.tempMin) > Number(t.dht22.tempMax)) errors.push("Suhu Min > Suhu Max");
+            if (t.dht22.humMin !== "" && t.dht22.humMax !== "" && Number(t.dht22.humMin) > Number(t.dht22.humMax)) errors.push("Kelembaban Min > Kelembaban Max");
         }
-        if (t.mq2 && t.mq2.smokeWarn > t.mq2.smokeMax) errors.push("Smoke Waspada > Smoke Bahaya");
-        if (t.pzem004t && t.pzem004t.voltageMin > t.pzem004t.voltageMax) errors.push("Tegangan Min > Tegangan Max");
-        if (t.bh1750 && t.bh1750.luxMin > t.bh1750.luxMax) errors.push("Cahaya Min > Cahaya Max");
+        if (t.mq2) {
+            if (t.mq2.smokeWarn !== "" && t.mq2.smokeMax !== "" && Number(t.mq2.smokeWarn) > Number(t.mq2.smokeMax)) errors.push("MQ2: Smoke Waspada > Smoke Bahaya");
+            if (t.mq2.lpgWarn !== "" && t.mq2.lpgMax !== "" && Number(t.mq2.lpgWarn) > Number(t.mq2.lpgMax)) errors.push("MQ2: LPG Waspada > LPG Bahaya");
+            if (t.mq2.coWarn !== "" && t.mq2.coMax !== "" && Number(t.mq2.coWarn) > Number(t.mq2.coMax)) errors.push("MQ2: CO Waspada > CO Bahaya");
+        }
+        if (t.pzem004t) {
+            if (t.pzem004t.voltageMin !== "" && t.pzem004t.voltageMax !== "" && Number(t.pzem004t.voltageMin) > Number(t.pzem004t.voltageMax)) errors.push("PZEM: Tegangan Min > Tegangan Max");
+        }
+        if (t.bh1750) {
+            if (t.bh1750.luxMin !== "" && t.bh1750.luxMax !== "" && Number(t.bh1750.luxMin) > Number(t.bh1750.luxMax)) errors.push("BH1750: Cahaya Min > Cahaya Max");
+        }
         return errors;
     };
 
@@ -111,7 +122,10 @@ export default function ThresholdSettings() {
                 });
                 setSavedType("threshold");
                 setSaved(true);
-                setTimeout(() => setSaved(false), 2000);
+                setTimeout(() => {
+                    setSaved(false);
+                    window.location.reload();
+                }, 800);
             }
         } catch (err) {
             setValidationError("Gagal menyimpan ke server");
@@ -135,7 +149,10 @@ export default function ThresholdSettings() {
                 updateSettings(resetData);
                 setSavedType("threshold");
                 setSaved(true);
-                setTimeout(() => setSaved(false), 2000);
+                setTimeout(() => {
+                    setSaved(false);
+                    window.location.reload();
+                }, 800);
             }
         } catch (err) {
             setValidationError("Gagal mereset");
@@ -181,14 +198,14 @@ export default function ThresholdSettings() {
                 <p className="text-slate-600 mt-1">Konfigurasi batas nilai sensor untuk notifikasi peringatan</p>
             </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
                 {isLoadingSettings ? (
                     <div className="flex items-center justify-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
                     </div>
                 ) : (
                     <form className="space-y-6" onSubmit={handleThresholdSubmit}>
-                        <div className="mb-6 s-4 bg-slate-50 p-4 rounded-lg flex items-center justify-between border border-slate-200">
+                        <div className="mb-6 flex gap-4 bg-slate-50 p-4 rounded-xl items-center justify-between border border-slate-100/50">
                             <div>
                                 <h4 className="text-sm font-semibold text-slate-700">Notifikasi Sistem</h4>
                                 <p className="text-xs text-slate-500">Aktifkan atau nonaktifkan semua peringatan.</p>
@@ -205,38 +222,144 @@ export default function ThresholdSettings() {
                                     <span className="text-sm font-medium text-slate-700">Status Aktif</span>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" className="sr-only peer" checked={thresholdData.telegramConfig?.enabled || false} onChange={(e) => setThresholdData(prev => ({ ...prev, telegramConfig: { ...prev.telegramConfig, enabled: e.target.checked } }))} />
-                                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-teal-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
                                     </label>
                                 </div>
                                 {thresholdData.telegramConfig?.enabled && (
                                     <div className="space-y-4">
-                                        <input type="text" value={thresholdData.telegramConfig?.bot_token || ""} onChange={(e) => setThresholdData(prev => ({ ...prev, telegramConfig: { ...prev.telegramConfig, bot_token: e.target.value } }))} placeholder="Bot Token" className="w-full px-3 py-2 border rounded-lg text-sm" />
+                                        <input type="text" value={thresholdData.telegramConfig?.bot_token || ""} onChange={(e) => setThresholdData(prev => ({ ...prev, telegramConfig: { ...prev.telegramConfig, bot_token: e.target.value } }))} placeholder="Bot Token" className="w-full px-4 py-3 border border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
                                         <div className="flex gap-2">
-                                            <input type="text" value={thresholdData.telegramConfig?.chat_id || ""} onChange={(e) => setThresholdData(prev => ({ ...prev, telegramConfig: { ...prev.telegramConfig, chat_id: e.target.value } }))} placeholder="Chat ID" className="w-full px-3 py-2 border rounded-lg text-sm" />
-                                            <button type="button" onClick={handleTelegramTest} className="px-4 py-2 bg-slate-100 rounded-lg text-xs font-semibold">{isTestLoading ? "..." : "Test"}</button>
+                                            <input type="text" value={thresholdData.telegramConfig?.chat_id || ""} onChange={(e) => setThresholdData(prev => ({ ...prev, telegramConfig: { ...prev.telegramConfig, chat_id: e.target.value } }))} placeholder="Chat ID" className="w-full px-4 py-3 border border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            <button type="button" onClick={handleTelegramTest} className="px-6 py-3 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg text-sm font-bold transition-colors">{isTestLoading ? "..." : "Test"}</button>
                                         </div>
                                     </div>
                                 )}
                             </CollapsibleSection>
 
                             <CollapsibleSection title="DHT22 (Suhu & Kelembaban)" isOpen={expandedSections.dht22} onToggle={() => toggleSection('dht22')} color="bg-blue-500">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div><label className="text-xs font-medium">Temp Max</label><input type="number" value={thresholdData.thresholds.dht22?.tempMax ?? ""} onChange={(e) => handleThresholdChange("dht22", "tempMax", e.target.value)} className="w-full border p-2 rounded" /></div>
-                                    <div><label className="text-xs font-medium">Temp Min</label><input type="number" value={thresholdData.thresholds.dht22?.tempMin ?? ""} onChange={(e) => handleThresholdChange("dht22", "tempMin", e.target.value)} className="w-full border p-2 rounded" /></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center border-b border-teal-100 pb-2">
+                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">Suhu (°C)</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Batas Max</label>
+                                                <input type="number" step="0.1" value={thresholdData.thresholds.dht22?.tempMax ?? ""} onChange={(e) => handleThresholdChange("dht22", "tempMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Batas Min</label>
+                                                <input type="number" step="0.1" value={thresholdData.thresholds.dht22?.tempMin ?? ""} onChange={(e) => handleThresholdChange("dht22", "tempMin", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center border-b border-teal-100 pb-2">
+                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">Kelembaban (%)</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Batas Max</label>
+                                                <input type="number" value={thresholdData.thresholds.dht22?.humMax ?? ""} onChange={(e) => handleThresholdChange("dht22", "humMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Batas Min</label>
+                                                <input type="number" value={thresholdData.thresholds.dht22?.humMin ?? ""} onChange={(e) => handleThresholdChange("dht22", "humMin", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </CollapsibleSection>
 
                             <CollapsibleSection title="MQ2 (Kualitas Udara)" isOpen={expandedSections.mq2} onToggle={() => toggleSection('mq2')} color="bg-orange-500">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div><label className="text-xs font-medium">Smoke Max</label><input type="number" value={thresholdData.thresholds.mq2?.smokeMax ?? ""} onChange={(e) => handleThresholdChange("mq2", "smokeMax", e.target.value)} className="w-full border p-2 rounded" /></div>
-                                    <div><label className="text-xs font-medium">Smoke Warn</label><input type="number" value={thresholdData.thresholds.mq2?.smokeWarn ?? ""} onChange={(e) => handleThresholdChange("mq2", "smokeWarn", e.target.value)} className="w-full border p-2 rounded" /></div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center border-b border-teal-100 pb-2">
+                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">Asap (ppm)</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Bahaya</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.smokeMax ?? ""} onChange={(e) => handleThresholdChange("mq2", "smokeMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Waspada</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.smokeWarn ?? ""} onChange={(e) => handleThresholdChange("mq2", "smokeWarn", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center border-b border-teal-100 pb-2">
+                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">LPG (ppm)</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Bahaya</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.lpgMax ?? ""} onChange={(e) => handleThresholdChange("mq2", "lpgMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Waspada</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.lpgWarn ?? ""} onChange={(e) => handleThresholdChange("mq2", "lpgWarn", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center border-b border-teal-100 pb-2">
+                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">CO (ppm)</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Bahaya</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.coMax ?? ""} onChange={(e) => handleThresholdChange("mq2", "coMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Waspada</label>
+                                                <input type="number" value={thresholdData.thresholds.mq2?.coWarn ?? ""} onChange={(e) => handleThresholdChange("mq2", "coWarn", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </CollapsibleSection>
 
-                            <CollapsibleSection title="PZEM004T (Listrik)" isOpen={expandedSections.pzem} onToggle={() => toggleSection('pzem')} color="bg-yellow-500">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div><label className="text-xs font-medium">Voltage Max</label><input type="number" value={thresholdData.thresholds.pzem004t?.voltageMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "voltageMax", e.target.value)} className="w-full border p-2 rounded" /></div>
-                                    <div><label className="text-xs font-medium">Power Max</label><input type="number" value={thresholdData.thresholds.pzem004t?.powerMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "powerMax", e.target.value)} className="w-full border p-2 rounded" /></div>
+                            <CollapsibleSection title="PZEM004T (Monitor Listrik)" isOpen={expandedSections.pzem} onToggle={() => toggleSection('pzem')} color="bg-yellow-500">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Tegangan Max (V)</label>
+                                        <input type="number" value={thresholdData.thresholds.pzem004t?.voltageMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "voltageMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Tegangan Min (V)</label>
+                                        <input type="number" value={thresholdData.thresholds.pzem004t?.voltageMin ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "voltageMin", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Daya Max (W)</label>
+                                        <input type="number" value={thresholdData.thresholds.pzem004t?.powerMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "powerMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Arus Max (A)</label>
+                                        <input type="number" step="0.1" value={thresholdData.thresholds.pzem004t?.currentMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "currentMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Energi Max (kWh)</label>
+                                        <input type="number" value={thresholdData.thresholds.pzem004t?.energyMax ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "energyMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Power Factor Min</label>
+                                        <input type="number" step="0.01" value={thresholdData.thresholds.pzem004t?.pfMin ?? ""} onChange={(e) => handleThresholdChange("pzem004t", "pfMin", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            <CollapsibleSection title="BH1750 (Intensitas Cahaya)" isOpen={expandedSections.bh1750} onToggle={() => toggleSection('bh1750')} color="bg-yellow-400">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Lux Max</label>
+                                        <input type="number" value={thresholdData.thresholds.bh1750?.luxMax ?? ""} onChange={(e) => handleThresholdChange("bh1750", "luxMax", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">Lux Min</label>
+                                        <input type="number" value={thresholdData.thresholds.bh1750?.luxMin ?? ""} onChange={(e) => handleThresholdChange("bh1750", "luxMin", e.target.value)} className="w-full border-2 border-teal-100 p-3 rounded-xl text-sm font-medium focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white" />
+                                    </div>
                                 </div>
                             </CollapsibleSection>
                         </div>
@@ -244,20 +367,20 @@ export default function ThresholdSettings() {
                         {validationError && <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">{validationError}</div>}
                         {saved && savedType === "threshold" && <div className="p-3 bg-green-100 text-green-700 rounded-lg text-sm">Berhasil disimpan!</div>}
 
-                        <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-6 border-t border-slate-100">
-                            <button
-                                type="button"
-                                onClick={() => setShowThresholdResetModal(true)}
-                                className="w-full md:w-32 px-6 py-3 border border-slate-300 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
-                            >
-                                Reset
-                            </button>
+                        <div className="flex flex-row justify-end gap-3 pt-6 border-t border-slate-100/50">
                             <button
                                 type="submit"
                                 disabled={isSavingSettings}
                                 className="w-full md:w-48 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSavingSettings ? "Menyimpan..." : "Simpan"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowThresholdResetModal(true)}
+                                className="w-full md:w-32 px-6 py-3 border border-slate-100/50 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
+                            >
+                                Reset
                             </button>
                         </div>
                     </form>

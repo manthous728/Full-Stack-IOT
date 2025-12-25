@@ -191,7 +191,7 @@ export default function UserManagement() {
             ) : (
                 <div className="space-y-4">
                     {/* Desktop Table View */}
-                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-100/50 overflow-hidden">
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-slate-50">
                                 <tr>
@@ -261,7 +261,7 @@ export default function UserManagement() {
                     {/* Mobile Card View */}
                     <div className="md:hidden grid grid-cols-1 gap-4">
                         {users.map((u) => (
-                            <div key={u.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <div key={u.id} className="bg-white p-5 rounded-xl border border-slate-100/50 shadow-sm space-y-4">
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900">{u.username}</h3>
@@ -277,7 +277,7 @@ export default function UserManagement() {
                                     </div>
                                 </div>
 
-                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                                <div className="pt-2 border-t border-slate-100/50 flex items-center justify-between text-sm text-slate-500">
                                     <span>Dibuat: {new Date(u.created_at).toLocaleDateString()}</span>
                                 </div>
 
@@ -293,7 +293,7 @@ export default function UserManagement() {
                                             Reset
                                         </button>
                                     ) : (
-                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100 opacity-60">
+                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100/50 opacity-60">
                                             Admin Utama
                                         </div>
                                     )}
@@ -309,7 +309,7 @@ export default function UserManagement() {
                                             Hapus
                                         </button>
                                     ) : (
-                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100 opacity-60">
+                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100/50 opacity-60">
                                             LOCKED
                                         </div>
                                     )}
@@ -339,7 +339,7 @@ export default function UserManagement() {
                                     type="text"
                                     value={newUser.username}
                                     onChange={e => setNewUser({ ...newUser, username: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                                    className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500"
                                     required
                                 />
                             </div>
@@ -349,7 +349,7 @@ export default function UserManagement() {
                                     type="password"
                                     value={newUser.password}
                                     onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                                    className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500"
                                     required
                                 />
                             </div>
@@ -359,7 +359,7 @@ export default function UserManagement() {
                                     type="password"
                                     value={confirmPassword}
                                     onChange={e => setConfirmPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                                    className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500"
                                     required
                                 />
                             </div>
@@ -368,7 +368,7 @@ export default function UserManagement() {
                                 <select
                                     value={newUser.role}
                                     onChange={e => setNewUser({ ...newUser, role: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500"
+                                    className="w-full px-3 py-2 border border-slate-100/50 rounded-lg focus:ring-2 focus:ring-teal-500"
                                 >
                                     <option value="user">User Biasa</option>
                                     <option value="admin">Admin</option>
@@ -419,7 +419,7 @@ export default function UserManagement() {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setDeleteModal({ show: false, userId: null })}
-                                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                                className="flex-1 px-4 py-2 border border-slate-100/50 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                             >
                                 Batal
                             </button>
@@ -448,7 +448,7 @@ export default function UserManagement() {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setResetConfirmModal({ show: false, userId: null, username: '' })}
-                                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                                className="flex-1 px-4 py-2 border border-slate-100/50 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                             >
                                 Batal
                             </button>
@@ -477,7 +477,7 @@ export default function UserManagement() {
                             Password sementara untuk user <span className="font-semibold text-slate-900">{resetModal.username}</span>:
                         </p>
 
-                        <div className="bg-slate-100 p-3 rounded-lg border border-slate-200 mb-6 font-mono text-xl font-bold text-slate-800 tracking-wider select-all">
+                        <div className="bg-slate-100 p-3 rounded-lg border border-slate-100/50 mb-6 font-mono text-xl font-bold text-slate-800 tracking-wider select-all">
                             {resetModal.tempPassword}
                         </div>
 

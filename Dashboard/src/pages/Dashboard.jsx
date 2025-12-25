@@ -268,7 +268,7 @@ export default function Dashboard() {
           return (
             <div
               key={card.id}
-              className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+              className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
             >
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-slate-500">
@@ -320,7 +320,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Temperature Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-slate-800">Suhu Ruangan (DHT22)</h3>
             <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded">Realtime</span>
@@ -337,7 +337,7 @@ export default function Dashboard() {
         </div>
 
         {/* Humidity Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-slate-800">Kelembaban (DHT22)</h3>
             <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded">Realtime</span>

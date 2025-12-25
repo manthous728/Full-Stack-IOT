@@ -39,7 +39,7 @@ export const MQTT_CONFIG = {
             pfMin: 0.85,
         },
         bh1750: {
-            luxMax: 1000,
+            luxMax: 100000,
             luxMin: 0,
         },
     },

@@ -382,7 +382,7 @@ export default function SensorDHT22() {
             <select
               value={historyRange}
               onChange={(e) => setHistoryRange(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full p-2 border border-slate-100/50 rounded-lg bg-white text-slate-700 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             >
               {TIME_RANGES.map((range) => (
                 <option key={range.value} value={range.value}>
@@ -393,12 +393,12 @@ export default function SensorDHT22() {
           </div>
 
           {/* Desktop Buttons */}
-          <div className="hidden md:flex bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+          <div className="hidden md:flex bg-white border border-slate-100/50 rounded-md shadow-sm overflow-hidden">
             {TIME_RANGES.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setHistoryRange(range.value)}
-                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
+                className={`px-3 py-1.5 text-xs font-medium border-r border-slate-100/50 last:border-0 hover:bg-slate-50 transition-colors ${historyRange === range.value ? 'bg-teal-50 text-teal-600' : 'text-slate-600'
                   }`}
               >
                 {range.label}
@@ -410,7 +410,7 @@ export default function SensorDHT22() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div
-          className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+          className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
         >
           <p className="text-sm font-medium text-slate-500">Suhu</p>
           <h3 className="text-3xl font-bold text-red-500 mt-2">
@@ -426,7 +426,7 @@ export default function SensorDHT22() {
         </div>
 
         <div
-          className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+          className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
         >
           <p className="text-sm font-medium text-slate-500">Kelembaban</p>
           <h3 className="text-3xl font-bold text-blue-500 mt-2">
@@ -443,7 +443,7 @@ export default function SensorDHT22() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Temperature Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-800">
               Suhu {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
@@ -461,7 +461,7 @@ export default function SensorDHT22() {
         </div>
 
         {/* Humidity Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-800">
               Kelembaban {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}

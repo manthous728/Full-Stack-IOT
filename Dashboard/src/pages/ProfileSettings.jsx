@@ -82,12 +82,18 @@ export default function ProfileSettings() {
                     setProfileImage(`${API_BASE_URL}${uploadedAvatarUrl}?${Date.now()}`);
                     setSavedType("profile_photo");
                     setSaved(true);
-                    setTimeout(() => setSaved(false), 2000);
+                    setTimeout(() => {
+                        setSaved(false);
+                        window.location.reload();
+                    }, 800);
                 }
 
                 setSavedType("profile");
                 setSaved(true);
-                setTimeout(() => setSaved(false), 2000);
+                setTimeout(() => {
+                    setSaved(false);
+                    window.location.reload();
+                }, 800);
                 setProfileData({ ...profileData, currentPassword: "", newPassword: "", confirmPassword: "" });
                 setSelectedFile(null);
             } else {
@@ -107,8 +113,8 @@ export default function ProfileSettings() {
                 <p className="text-slate-600 mt-1">Kelola informasi akun dan kata sandi Anda</p>
             </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
-                <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
+                <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-100/50">
                     <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center md:text-left">Foto Profil</h3>
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="relative">
@@ -143,22 +149,50 @@ export default function ProfileSettings() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Username</label>
-                            <input name="newUsername" type="text" value={profileData.newUsername} onChange={handleProfileChange} className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition-colors" />
+                            <input
+                                name="newUsername"
+                                type="text"
+                                value={profileData.newUsername}
+                                onChange={handleProfileChange}
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Password Saat Ini <span className="text-red-500">*</span></label>
-                            <input name="currentPassword" type="password" value={profileData.currentPassword} onChange={handleProfileChange} required className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Konfirmasi password" />
+                            <input
+                                name="currentPassword"
+                                type="password"
+                                value={profileData.currentPassword}
+                                onChange={handleProfileChange}
+                                required
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
+                                placeholder="Konfirmasi password"
+                            />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Password Baru (Opsional)</label>
-                            <input name="newPassword" type="password" value={profileData.newPassword} onChange={handleProfileChange} className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Kosongkan jika tidak ubah" />
+                            <input
+                                name="newPassword"
+                                type="password"
+                                value={profileData.newPassword}
+                                onChange={handleProfileChange}
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
+                                placeholder="Kosongkan jika tidak ubah"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Konfirmasi Password Baru</label>
-                            <input name="confirmPassword" type="password" value={profileData.confirmPassword} onChange={handleProfileChange} className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Ulangi password baru" />
+                            <input
+                                name="confirmPassword"
+                                type="password"
+                                value={profileData.confirmPassword}
+                                onChange={handleProfileChange}
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
+                                placeholder="Ulangi password baru"
+                            />
                         </div>
                     </div>
 
@@ -169,7 +203,7 @@ export default function ProfileSettings() {
                         <div className="p-4 bg-green-50 text-green-700 rounded-lg text-sm border border-green-100">Profil berhasil diperbarui!</div>
                     )}
 
-                    <div className="flex justify-end pt-6 border-t border-slate-100">
+                    <div className="flex justify-end pt-6 border-t border-slate-100/50">
                         <button
                             type="submit"
                             disabled={isSaving}

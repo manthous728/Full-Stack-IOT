@@ -142,7 +142,7 @@ export default function Relay() {
           return (
             <div
               key={relayNum}
-              className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+              className="bg-white p-6 rounded-xl shadow-sm border border-slate-100/50 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-start gap-4">
@@ -181,7 +181,7 @@ export default function Relay() {
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   : relay.isOn
                     ? 'bg-green-500 text-white hover:bg-green-600 shadow-md'
-                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:shadow-sm'
+                    : 'bg-white text-slate-700 border border-slate-100/50 hover:bg-slate-50 hover:shadow-sm'
                   }`}
               >
                 {relay.isOn ? "ON" : "OFF"}

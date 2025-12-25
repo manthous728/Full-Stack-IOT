@@ -123,6 +123,9 @@ export function MqttProvider({ children }) {
 
   // Add notification with auto-dismiss
   const addNotification = useCallback((message, type = 'warning', sensor = '') => {
+    // Redundant switch for safety
+    if (!settings.enableThresholds) return;
+
     const id = Date.now();
     const alertKey = `${sensor}-${message}`;
     const now = Date.now();
@@ -154,8 +157,8 @@ export function MqttProvider({ children }) {
 
   // Check thresholds and trigger notifications
   const sendTelegramAlert = useCallback(async (message) => {
-    // Check if telegram is enabled in local settings first
-    if (!settings.telegramConfig?.enabled) return;
+    // Check if thresholds are globally enabled AND telegram is specifically enabled
+    if (!settings.enableThresholds || !settings.telegramConfig?.enabled) return;
 
     try {
       await fetch(`${API_BASE_URL}/notify/telegram/send`, {
@@ -461,7 +464,7 @@ export function MqttProvider({ children }) {
             lastUpdateRef.current.pzem004t = nowTs;
 
             // Check thresholds
-            checkThresholds('pzem004t', { voltage, power, current });
+            checkThresholds('pzem004t', { voltage, power, current, energy, pf });
 
             setSensorData((prev) => {
               const newVoltage = [...prev.pzem004t.voltage, voltage];
@@ -557,8 +560,9 @@ export function MqttProvider({ children }) {
 
   const connect = useCallback((isManualReconnect = false) => {
     if (clientRef.current) {
-      clientRef.current.end(true, null, () => {
-        // Callback after the client is properly ended
+      const oldClient = clientRef.current;
+      clientRef.current = null; // Prevent race conditions
+      oldClient.end(true, {}, () => {
         setupNewConnection(isManualReconnect);
       });
     } else {

@@ -54,7 +54,7 @@ export default function ForceChangePassword() {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/95 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 border border-slate-200">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 border border-slate-100/50">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ export default function ForceChangePassword() {
                             required
                             value={formData.currentPassword}
                             onChange={e => setFormData({ ...formData, currentPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-mono"
+                            className="w-full px-4 py-3 border border-slate-100/50 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-mono"
                             placeholder="Masukkan password dari admin"
                         />
                     </div>
@@ -96,7 +96,7 @@ export default function ForceChangePassword() {
                             required
                             value={formData.newPassword}
                             onChange={e => setFormData({ ...formData, newPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                            className="w-full px-4 py-3 border border-slate-100/50 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
                             placeholder="Password baru Anda"
                         />
                     </div>
@@ -108,7 +108,7 @@ export default function ForceChangePassword() {
                             required
                             value={formData.confirmPassword}
                             onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                            className="w-full px-4 py-3 border border-slate-100/50 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
                             placeholder="Ulangi password baru"
                         />
                     </div>

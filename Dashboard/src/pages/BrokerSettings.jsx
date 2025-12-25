@@ -55,8 +55,8 @@ export default function BrokerSettings() {
         setSaved(true);
         setTimeout(() => {
             setSaved(false);
-            connect();
-        }, 1500);
+            window.location.reload();
+        }, 800);
     };
 
     const handleBrokerReset = () => {
@@ -74,7 +74,7 @@ export default function BrokerSettings() {
                 <p className="text-slate-600 mt-1">Konfigurasi koneksi MQTT untuk sinkronisasi data sensor</p>
             </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-100/50">
                 <form className="space-y-6" onSubmit={handleBrokerSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -89,7 +89,7 @@ export default function BrokerSettings() {
                                 onChange={handleBrokerChange}
                                 placeholder="contoh: broker.hivemq.com"
                                 required
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
                             />
                             <p className="mt-1 text-xs text-slate-500">Alamat host MQTT broker</p>
                         </div>
@@ -107,7 +107,7 @@ export default function BrokerSettings() {
                                 min="1"
                                 max="65535"
                                 required
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                                className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
                             />
                             <p className="mt-1 text-xs text-slate-500">Port MQTT broker (default: 8884 untuk WSS)</p>
                         </div>
@@ -126,7 +126,7 @@ export default function BrokerSettings() {
                             min="1"
                             max="3600"
                             required
-                            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                            className="w-full px-4 py-3 border-2 border-teal-100 rounded-xl focus:ring-2 focus:ring-teal-500 transition-all outline-none bg-white font-medium text-sm"
                         />
                         <p className="mt-1 text-xs text-slate-500">Interval update data dalam detik (1-3600)</p>
                     </div>
@@ -143,19 +143,19 @@ export default function BrokerSettings() {
                         </div>
                     )}
 
-                    <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-6 border-t border-slate-100">
-                        <button
-                            type="button"
-                            onClick={handleBrokerReset}
-                            className="w-full md:w-32 px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
-                        >
-                            Reset
-                        </button>
+                    <div className="flex flex-row justify-end gap-3 pt-6 border-t border-slate-100/50">
                         <button
                             type="submit"
                             className="w-full md:w-48 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg shadow-teal-500/20 active:scale-[0.98]"
                         >
                             Simpan
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleBrokerReset}
+                            className="w-full md:w-32 px-6 py-3 border border-slate-100/50 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
+                        >
+                            Reset
                         </button>
                     </div>
                 </form>
@@ -174,10 +174,10 @@ export default function BrokerSettings() {
                             <p className="text-slate-600 mb-6 font-medium">
                                 Perubahan ini akan <span className="text-red-500 font-bold">memutus koneksi saat ini</span> dan menghubungkan ulang ke broker baru.
                             </p>
-                            <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-6 border-t border-slate-100">
+                            <div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-6 border-t border-slate-100/50">
                                 <button
                                     onClick={() => setShowBrokerModal(false)}
-                                    className="w-full md:w-32 px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
+                                    className="w-full md:w-32 px-6 py-3 border border-slate-100/50 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-all duration-200"
                                 >
                                     Batal
                                 </button>
