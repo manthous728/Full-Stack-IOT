@@ -13,8 +13,6 @@ const MqttContext = createContext();
 
 const DEFAULT_SETTINGS = MQTT_CONFIG;
 
-const MAX_DATA_POINTS = 50; // Increase to store more data before clearing
-
 export function MqttProvider({ children }) {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionTime, setConnectionTime] = useState(null);
@@ -155,76 +153,106 @@ export function MqttProvider({ children }) {
   }, []);
 
   // Check thresholds and trigger notifications
+  const sendTelegramAlert = useCallback(async (message) => {
+    // Check if telegram is enabled in local settings first
+    if (!settings.telegramConfig?.enabled) return;
+
+    try {
+      await fetch(`${API_BASE_URL}/notify/telegram/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+    } catch (err) {
+      console.error("Failed to send telegram alert:", err);
+    }
+  }, [settings.telegramConfig]);
+
   const checkThresholds = useCallback((sensor, data) => {
+    // Ensure we respect the global enable switch
+    if (!settings.enableThresholds) return;
+
     const thresholds = settings.thresholds?.[sensor];
     if (!thresholds) return;
+
+    const checkAndNotify = (val, limit, type, label, unit) => {
+      if (val === undefined || val === null || limit === undefined || limit === null || limit === "") return;
+
+      const numVal = parseFloat(val);
+      const numLimit = parseFloat(limit);
+      if (isNaN(numVal) || isNaN(numLimit)) return;
+
+      let triggered = false;
+      let msg = "";
+
+      if (type === 'max' && numVal > numLimit) {
+        triggered = true;
+        msg = `⚠️ *PERINGATAN ${sensor.toUpperCase()}*\n${label} tinggi: *${numVal}${unit}* (Batas: ${numLimit}${unit})`;
+      } else if (type === 'min' && numVal < numLimit) {
+        triggered = true;
+        msg = `⚠️ *PERINGATAN ${sensor.toUpperCase()}*\n${label} rendah: *${numVal}${unit}* (Batas: ${numLimit}${unit})`;
+      }
+
+      if (triggered) {
+        const alertKey = `${sensor}-${label}-${type}`;
+        const now = Date.now();
+
+        // Local notification
+        if (label.includes("Bahaya") || label.includes("tinggi") || label.includes("rendah")) {
+          addNotification(msg.replace(/\*/g, ''), 'danger', sensor.toUpperCase());
+        } else {
+          addNotification(msg.replace(/\*/g, ''), 'warning', sensor.toUpperCase());
+        }
+
+        // Telegram Alert (with cooldown)
+        if (!lastAlertRef.current[alertKey] || now - lastAlertRef.current[alertKey] > ALERT_COOLDOWN) {
+          sendTelegramAlert(msg);
+          lastAlertRef.current[alertKey] = now;
+          addHistoryEntry(`${sensor.toUpperCase()}: ${label} ${type === 'max' ? '>' : '<'} ${numLimit}`, 'Alert', 'text-red-600');
+        }
+      }
+    };
 
     switch (sensor) {
       case 'dht22': {
         const { temp, hum } = data;
-        if (thresholds.tempMax && temp > thresholds.tempMax) {
-          addNotification(`Suhu tinggi! ${temp}°C melebihi batas ${thresholds.tempMax}°C`, 'danger', 'DHT22');
-          addHistoryEntry(`DHT22: Suhu ${temp}°C melebihi batas`, 'Warning', 'text-red-600');
-        }
-        if (thresholds.tempMin && temp < thresholds.tempMin) {
-          addNotification(`Suhu rendah! ${temp}°C dibawah batas ${thresholds.tempMin}°C`, 'warning', 'DHT22');
-          addHistoryEntry(`DHT22: Suhu ${temp}°C dibawah batas`, 'Warning', 'text-yellow-600');
-        }
-        if (thresholds.humMax && hum > thresholds.humMax) {
-          addNotification(`Kelembaban tinggi! ${hum}% melebihi batas ${thresholds.humMax}%`, 'warning', 'DHT22');
-          addHistoryEntry(`DHT22: Kelembaban ${hum}% melebihi batas`, 'Warning', 'text-yellow-600');
-        }
-        if (thresholds.humMin && hum < thresholds.humMin) {
-          addNotification(`Kelembaban rendah! ${hum}% dibawah batas ${thresholds.humMin}%`, 'warning', 'DHT22');
-          addHistoryEntry(`DHT22: Kelembaban ${hum}% dibawah batas`, 'Warning', 'text-yellow-600');
-        }
+        checkAndNotify(temp, thresholds.tempMax, 'max', 'Suhu', '°C');
+        checkAndNotify(temp, thresholds.tempMin, 'min', 'Suhu', '°C');
+        checkAndNotify(hum, thresholds.humMax, 'max', 'Kelembaban', '%');
+        checkAndNotify(hum, thresholds.humMin, 'min', 'Kelembaban', '%');
         break;
       }
       case 'mq2': {
         const { lpg, co, smoke } = data;
-        if (thresholds.smokeMax && smoke > thresholds.smokeMax) {
-          addNotification(`⚠️ BAHAYA! Smoke ${smoke} melebihi batas kritis ${thresholds.smokeMax}`, 'danger', 'MQ2');
-          addHistoryEntry(`MQ2: Smoke ${smoke} - BAHAYA!`, 'Critical', 'text-red-600');
-        } else if (thresholds.smokeWarn && smoke > thresholds.smokeWarn) {
-          addNotification(`Smoke terdeteksi! ${smoke} melebihi ambang peringatan ${thresholds.smokeWarn}`, 'warning', 'MQ2');
-          addHistoryEntry(`MQ2: Smoke ${smoke} - Peringatan`, 'Warning', 'text-yellow-600');
-        }
-        if (thresholds.lpgMax && lpg > thresholds.lpgMax) {
-          addNotification(`⚠️ LPG tinggi! ${lpg} melebihi batas ${thresholds.lpgMax}`, 'danger', 'MQ2');
-        }
-        if (thresholds.coMax && co > thresholds.coMax) {
-          addNotification(`⚠️ CO tinggi! ${co} melebihi batas ${thresholds.coMax}`, 'danger', 'MQ2');
-        }
+        // Smoke
+        checkAndNotify(smoke, thresholds.smokeMax, 'max', 'Asap (Bahaya)', ' ppm');
+        checkAndNotify(smoke, thresholds.smokeWarn, 'max', 'Asap (Waspada)', ' ppm');
+        // LPG
+        checkAndNotify(lpg, thresholds.lpgMax, 'max', 'LPG (Bahaya)', ' ppm');
+        checkAndNotify(lpg, thresholds.lpgWarn, 'max', 'LPG (Waspada)', ' ppm');
+        // CO
+        checkAndNotify(co, thresholds.coMax, 'max', 'CO (Bahaya)', ' ppm');
+        checkAndNotify(co, thresholds.coWarn, 'max', 'CO (Waspada)', ' ppm');
         break;
       }
       case 'pzem004t': {
-        const { voltage, power } = data;
-        if (thresholds.powerMax && power > thresholds.powerMax) {
-          addNotification(`Daya tinggi! ${power}W melebihi batas ${thresholds.powerMax}W`, 'warning', 'PZEM');
-          addHistoryEntry(`PZEM: Daya ${power}W melebihi batas`, 'Warning', 'text-yellow-600');
-        }
-        if (thresholds.voltageMax && voltage > thresholds.voltageMax) {
-          addNotification(`Tegangan tinggi! ${voltage}V melebihi batas ${thresholds.voltageMax}V`, 'danger', 'PZEM');
-          addHistoryEntry(`PZEM: Tegangan ${voltage}V melebihi batas`, 'Warning', 'text-red-600');
-        }
-        if (thresholds.voltageMin && voltage < thresholds.voltageMin) {
-          addNotification(`Tegangan rendah! ${voltage}V dibawah batas ${thresholds.voltageMin}V`, 'warning', 'PZEM');
-          addHistoryEntry(`PZEM: Tegangan ${voltage}V dibawah batas`, 'Warning', 'text-yellow-600');
-        }
+        const { voltage, power, current, energy, pf } = data;
+        checkAndNotify(power, thresholds.powerMax, 'max', 'Daya', 'W');
+        checkAndNotify(voltage, thresholds.voltageMax, 'max', 'Tegangan', 'V');
+        checkAndNotify(voltage, thresholds.voltageMin, 'min', 'Tegangan', 'V');
+        checkAndNotify(current, thresholds.currentMax, 'max', 'Arus', 'A');
+        checkAndNotify(energy, thresholds.energyMax, 'max', 'Energi', 'kWh');
+        checkAndNotify(pf, thresholds.pfMin, 'min', 'Power Factor', '');
         break;
       }
       case 'bh1750': {
         const { lux } = data;
-        if (thresholds.luxMax && lux > thresholds.luxMax) {
-          addNotification(`Cahaya terlalu terang! ${lux} lux melebihi batas ${thresholds.luxMax} lux`, 'warning', 'BH1750');
-        }
-        if (thresholds.luxMin && lux < thresholds.luxMin) {
-          addNotification(`Cahaya terlalu redup! ${lux} lux dibawah batas ${thresholds.luxMin} lux`, 'warning', 'BH1750');
-        }
+        checkAndNotify(lux, thresholds.luxMax, 'max', 'Cahaya', ' lux');
+        checkAndNotify(lux, thresholds.luxMin, 'min', 'Cahaya', ' lux');
         break;
       }
     }
-  }, [settings.thresholds, addNotification, addHistoryEntry]);
+  }, [settings, addNotification, addHistoryEntry, sendTelegramAlert]);
 
   const setupNewConnection = useCallback((isManualReconnect = false) => {
     if (isManualReconnect) {
@@ -353,7 +381,7 @@ export function MqttProvider({ children }) {
               const newTime = [...prev.dht22.time, time];
 
               // If canvas is full, keep the last 30 points and remove old ones gradually
-              if (newTemp.length > MAX_DATA_POINTS) {
+              if (newTemp.length > (settings.maxDataPoints || DEFAULT_SETTINGS.maxDataPoints)) {
                 const keepPoints = 30; // Keep last 30 points for smooth transition
                 return {
                   ...prev,
@@ -376,10 +404,10 @@ export function MqttProvider({ children }) {
             });
           }
         } else if (topic === settings.topics.mq2) {
-          // Validate and parse MQ2 sensor data
-          const lpg = parseFloat(payload.lpg);
-          const co = parseFloat(payload.co);
-          const smoke = parseFloat(payload.smoke);
+          // Validate and parse MQ2 sensor data with fallbacks for different key variations
+          const lpg = parseFloat(payload.lpg ?? payload.gas_lpg ?? payload.LPG);
+          const co = parseFloat(payload.co ?? payload.gas_co ?? payload.CO);
+          const smoke = parseFloat(payload.smoke ?? payload.Smoke);
 
           if (!isNaN(lpg) && !isNaN(co) && !isNaN(smoke)) {
             if (nowTs - lastUpdateRef.current.mq2 < intervalMs) return;
@@ -395,7 +423,7 @@ export function MqttProvider({ children }) {
               const newTime = [...prev.mq2.time, time];
 
               // If canvas is full, keep the last 30 points and remove old ones gradually
-              if (newLpg.length > MAX_DATA_POINTS) {
+              if (newLpg.length > (settings.maxDataPoints || DEFAULT_SETTINGS.maxDataPoints)) {
                 const keepPoints = 30; // Keep last 30 points for smooth transition
                 return {
                   ...prev,
@@ -444,7 +472,7 @@ export function MqttProvider({ children }) {
               const newTime = [...prev.pzem004t.time, time];
 
               // If canvas is full, keep the last 30 points and remove old ones gradually
-              if (newVoltage.length > MAX_DATA_POINTS) {
+              if (newVoltage.length > (settings.maxDataPoints || DEFAULT_SETTINGS.maxDataPoints)) {
                 const keepPoints = 30; // Keep last 30 points for smooth transition
                 return {
                   ...prev,
@@ -488,7 +516,7 @@ export function MqttProvider({ children }) {
               const newTime = [...prev.bh1750.time, time];
 
               // If canvas is full, keep the last 30 points and remove old ones gradually
-              if (newLux.length > MAX_DATA_POINTS) {
+              if (newLux.length > (settings.maxDataPoints || DEFAULT_SETTINGS.maxDataPoints)) {
                 const keepPoints = 30; // Keep last 30 points for smooth transition
                 return {
                   ...prev,

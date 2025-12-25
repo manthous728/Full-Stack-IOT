@@ -102,16 +102,14 @@ export default function SensorDHT22() {
     }
   }, [viewMode, historyRange])
 
-  // Chart Generators
-  const chartData = useMemo(() => {
+  // Temperature Chart Data
+  const tempChartData = useMemo(() => {
     if ((viewMode === 'realtime' && (!hasData || !dht)) || (viewMode === 'history' && historyData.labels.length === 0)) {
       return { labels: [], datasets: [] }
     }
-
     const isDt = viewMode === 'realtime'
     const labels = isDt ? (dht.time || []) : historyData.labels
     const dataTemp = isDt ? (dht.temp || []) : historyData.temp
-    const dataHum = isDt ? (dht.hum || []) : historyData.hum
 
     return {
       labels,
@@ -122,44 +120,52 @@ export default function SensorDHT22() {
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: (context) => {
             const ctx = context.chart.ctx
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300)
-            gradient.addColorStop(0, 'rgba(255, 99, 132, 0.5)')
-            gradient.addColorStop(1, 'rgba(255, 99, 132, 0.05)')
+            const gradient = ctx.createLinearGradient(0, 0, 0, 240)
+            gradient.addColorStop(0, 'rgba(255, 99, 132, 0.4)')
+            gradient.addColorStop(1, 'rgba(255, 99, 132, 0.02)')
             return gradient
           },
-          yAxisID: 'yTemp',
           tension: 0.4,
           pointRadius: isDt ? 2 : 0,
-          pointHoverRadius: 4,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          fill: true
-        },
-        {
-          label: 'Kelembaban (%)',
-          data: dataHum.map(Number).filter(n => !isNaN(n)),
-          borderColor: 'rgb(54, 162, 235)',
-          backgroundColor: (context) => {
-            const ctx = context.chart.ctx
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300)
-            gradient.addColorStop(0, 'rgba(54, 162, 235, 0.5)')
-            gradient.addColorStop(1, 'rgba(54, 162, 235, 0.05)')
-            return gradient
-          },
-          yAxisID: 'yHum',
-          tension: 0.4,
-          pointRadius: isDt ? 2 : 0,
-          pointHoverRadius: 4,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
           fill: true
         }
       ]
     }
   }, [dht, hasData, viewMode, historyData])
 
-  // Chart options (unchanged from previous verified version)
-  const chartOptions = {
+  // Humidity Chart Data
+  const humChartData = useMemo(() => {
+    if ((viewMode === 'realtime' && (!hasData || !dht)) || (viewMode === 'history' && historyData.labels.length === 0)) {
+      return { labels: [], datasets: [] }
+    }
+    const isDt = viewMode === 'realtime'
+    const labels = isDt ? (dht.time || []) : historyData.labels
+    const dataHum = isDt ? (dht.hum || []) : historyData.hum
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Kelembaban (%)',
+          data: dataHum.map(Number).filter(n => !isNaN(n)),
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: (context) => {
+            const ctx = context.chart.ctx
+            const gradient = ctx.createLinearGradient(0, 0, 0, 240)
+            gradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)')
+            gradient.addColorStop(1, 'rgba(54, 162, 235, 0.02)')
+            return gradient
+          },
+          tension: 0.4,
+          pointRadius: isDt ? 2 : 0,
+          fill: true
+        }
+      ]
+    }
+  }, [dht, hasData, viewMode, historyData])
+
+  // Simple Base Options
+  const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -167,73 +173,67 @@ export default function SensorDHT22() {
       axis: 'x',
       intersect: false,
     },
-    animation: {
-      duration: 800,
-      easing: 'easeOutQuart',
-    },
     plugins: {
-      legend: {
-        position: 'top',
-      },
+      legend: { display: true, position: 'top', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 } } },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         titleColor: '#1e293b',
         bodyColor: '#475569',
         borderColor: '#e2e8f0',
         borderWidth: 1,
-        padding: 10,
-        boxPadding: 4,
         usePointStyle: true,
       },
       zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x',
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'x',
-        },
-        limits: {
-          x: { min: 'original', max: 'original' },
-        },
+        pan: { enabled: true, mode: 'x' },
+        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: {
-          autoSkip: true,
-          maxTicksLimit: 6,
-          color: '#94a3b8'
-        },
+        ticks: { autoSkip: true, maxTicksLimit: 5, color: '#94a3b8', font: { size: 10 } },
       },
-      yTemp: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        title: { display: true, text: 'Suhu (°C)', color: '#ef4444' },
+      y: {
         grid: { color: '#f1f5f9' },
-        ticks: { color: '#ef4444' }
-      },
-      yHum: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        title: { display: true, text: 'Kelembaban (%)', color: '#3b82f6' },
-        grid: { drawOnChartArea: false },
-        ticks: { color: '#3b82f6' },
-        min: 0,
-        max: 100,
-      },
+        ticks: { color: '#64748b', font: { size: 10 } }
+      }
     },
+  }
+
+  const tempOptions = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      title: { display: false }
+    },
+    scales: {
+      x: {
+        ...baseChartOptions.scales.x,
+      },
+      y: {
+        ...baseChartOptions.scales.y,
+        title: { display: true, text: 'Suhu (°C)', font: { size: 11, weight: 'bold' } }
+      }
+    }
+  }
+
+  const humOptions = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      title: { display: false }
+    },
+    scales: {
+      x: {
+        ...baseChartOptions.scales.x,
+      },
+      y: {
+        ...baseChartOptions.scales.y,
+        title: { display: true, text: 'Kelembaban (%)', font: { size: 11, weight: 'bold' } }, min: 0, max: 100
+      }
+    }
   }
 
   const latestTemp = dht.temp?.length > 0 ? dht.temp[dht.temp.length - 1] : '--'
@@ -441,27 +441,42 @@ export default function SensorDHT22() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">
-            {viewMode === 'realtime' ? 'Grafik Realtime' : 'Grafik Riwayat'}
-          </h3>
-          {viewMode === 'realtime' && (
-            <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded">
-              Min/Max/Avg: 100 data terakhir
-            </span>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Temperature Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">
+              Suhu {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
+            </h3>
+          </div>
+          <div style={{ height: 260 }}>
+            {isHistoryLoading && viewMode === 'history' ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+              </div>
+            ) : (
+              <Line data={tempChartData} options={tempOptions} />
+            )}
+          </div>
         </div>
 
-        {isHistoryLoading && viewMode === 'history' ? (
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+        {/* Humidity Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">
+              Kelembaban {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
+            </h3>
           </div>
-        ) : (
-          <div style={{ height: 300 }}>
-            <Line data={chartData} options={chartOptions} />
+          <div style={{ height: 260 }}>
+            {isHistoryLoading && viewMode === 'history' ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <Line data={humChartData} options={humOptions} />
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {viewMode === 'realtime' && (

@@ -3,14 +3,61 @@ import { useMqtt } from "../context/MqttContext";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config";
 
+const CollapsibleSection = ({ title, isOpen, onToggle, color, children }) => (
+  <div className="mb-4 border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm transition-all md:mb-6">
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`w-full flex items-center justify-between p-4 transition-colors ${isOpen ? 'bg-slate-50' : 'bg-white hover:bg-slate-50'}`}
+    >
+      <h4 className="text-sm font-semibold text-slate-700 flex items-center">
+        {color && <span className={`w-2 h-2 ${color} rounded-full mr-2`}></span>}
+        {title}
+      </h4>
+      <svg
+        className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+
+    <div
+      className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
+    >
+      <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+        {children}
+      </div>
+    </div>
+  </div>
+);
+
 export default function Settings() {
   const { settings, updateSettings, connect, DEFAULT_SETTINGS } = useMqtt();
-  const { user, updateProfile, isAdmin } = useAuth();
+  const { user, updateProfile, isAdmin, updateUserLocal } = useAuth();
   const [activeTab, setActiveTab] = useState(isAdmin ? "broker" : "profile");
 
   // Loading states
   const [isLoadingSettings, setIsLoadingSettings] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // UI State for Collapsible Sections
+  const [expandedSections, setExpandedSections] = useState({
+    telegram: true,
+    dht22: true,
+    mq2: false,
+    pzem: false,
+    bh1750: false
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   // Effect to ensure correct tab if role changes or on load
   useEffect(() => {
@@ -20,6 +67,24 @@ export default function Settings() {
   }, [isAdmin]);
 
   // Profile Settings
+  const [profileImage, setProfileImage] = useState(
+    user?.avatar_url
+      ? `${API_BASE_URL}${user.avatar_url}`
+      : `${API_BASE_URL}/static/default.jpg` // Fallback validation handling downstream
+  );
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handlePhotoChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      // Create preview URL
+      setProfileImage(URL.createObjectURL(file));
+    }
+  };
+
+
+
   const [profileData, setProfileData] = useState({
     currentPassword: "",
     newUsername: user?.username || "",
@@ -294,19 +359,55 @@ export default function Settings() {
       return;
     }
 
-    const res = await updateProfile(
-      profileData.currentPassword,
-      profileData.newUsername !== user.username ? profileData.newUsername : null,
-      profileData.newPassword || null
-    );
+    setIsSavingSettings(true);
 
-    if (res.success) {
-      setSavedType("profile");
-      setSaved(true);
-      setProfileData(prev => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
-      setTimeout(() => setSaved(false), 2000);
-    } else {
-      setValidationError(res.error);
+    try {
+      // 1. Upload Photo if selected
+      let uploadedAvatarUrl = null;
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('username', user?.username || 'user');
+
+        const res = await fetch(`${API_BASE_URL}/profile/photo`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Gagal upload foto");
+        }
+        const data = await res.json();
+        uploadedAvatarUrl = data.url;
+      }
+
+      // 2. Update Profile
+      const res = await updateProfile(
+        profileData.currentPassword,
+        profileData.newUsername !== user.username ? profileData.newUsername : null,
+        profileData.newPassword || null
+      );
+
+      if (res.success) {
+        if (uploadedAvatarUrl) {
+          updateUserLocal({ avatar_url: uploadedAvatarUrl });
+          setProfileImage(`${API_BASE_URL}${uploadedAvatarUrl}?${Date.now()}`);
+        }
+
+        setSavedType("profile");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+
+        setProfileData({ ...profileData, currentPassword: "", newPassword: "", confirmPassword: "" });
+        setSelectedFile(null);
+      } else {
+        setValidationError(res.error || "Gagal menyimpan perubahan");
+      }
+    } catch (err) {
+      setValidationError(err.message || "Terjadi kesalahan saat menyimpan");
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -428,7 +529,7 @@ export default function Settings() {
 
       {/* Broker Settings Tab */}
       {activeTab === "broker" && (
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
           <form className="space-y-6" onSubmit={handleBrokerSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -524,7 +625,7 @@ export default function Settings() {
 
       {/* Threshold Settings Tab */}
       {activeTab === "threshold" && (
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
           {isLoadingSettings ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -564,17 +665,21 @@ export default function Settings() {
                 <div className={`relative ${!thresholdData.enableThresholds ? 'opacity-50 pointer-events-none' : ''}`}>
 
                   {/* Telegram Notification Settings */}
-                  <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <CollapsibleSection
+                    title="Notifikasi Telegram"
+                    isOpen={expandedSections.telegram}
+                    onToggle={() => toggleSection('telegram')}
+                  >
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h4 className="text-sm font-semibold text-slate-700 flex items-center">
                           <svg className="w-5 h-5 text-sky-500 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.48-1.01-2.4-1.61-.41-.27-.47-1.05.1-1.60.27-.26 2.39-2.27 2.45-2.26.23-.42-.03-.64-.26-.54-.3.12-2.03 1.29-2.6 1.63-.49.3-.94.49-1.9.47-.64-.01-1.52-.29-2.13-.48-1.29-.41-1.3-.96-.28-1.39 5.31-2.26 8.53-3.69 9.6-4.14 2.87-1.19 3.01-1.03 3.01.69.01.2 0 .43-.01.67z" />
                           </svg>
-                          Notifikasi Telegram
+                          Status
                         </h4>
                         <p className="text-xs text-slate-500 mt-1">
-                          Kirim peringatan ke Telegram Bot Anda.
+                          Aktifkan integrasi Telegram.
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -641,14 +746,15 @@ export default function Settings() {
                         )}
                       </div>
                     )}
-                  </div>
+                  </CollapsibleSection>
 
                   {/* DHT22 Threshold */}
-                  <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                      DHT22 (Suhu & Kelembaban)
-                    </h4>
+                  <CollapsibleSection
+                    title="DHT22 (Suhu & Kelembaban)"
+                    isOpen={expandedSections.dht22}
+                    onToggle={() => toggleSection('dht22')}
+                    color="bg-blue-500"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-slate-600 mb-1">
@@ -715,15 +821,15 @@ export default function Settings() {
                         />
                       </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
 
                   {/* MQ2 Threshold */}
-                  <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                      MQ2 (Kualitas Udara)
-                    </h4>
-
+                  <CollapsibleSection
+                    title="MQ2 (Kualitas Udara)"
+                    isOpen={expandedSections.mq2}
+                    onToggle={() => toggleSection('mq2')}
+                    color="bg-orange-500"
+                  >
                     {/* Smoke */}
                     <p className="text-xs font-medium text-slate-500 mb-2">Smoke</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -826,14 +932,15 @@ export default function Settings() {
                         />
                       </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
 
                   {/* PZEM004T Threshold */}
-                  <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                      PZEM004T (Daya & Tegangan)
-                    </h4>
+                  <CollapsibleSection
+                    title="PZEM004T (Daya & Tegangan)"
+                    isOpen={expandedSections.pzem}
+                    onToggle={() => toggleSection('pzem')}
+                    color="bg-yellow-500"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
                         <label className="block text-xs font-medium text-slate-600 mb-1">
@@ -948,14 +1055,15 @@ export default function Settings() {
                         />
                       </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
 
                   {/* BH1750 Threshold */}
-                  <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      BH1750 (Cahaya)
-                    </h4>
+                  <CollapsibleSection
+                    title="BH1750 (Cahaya)"
+                    isOpen={expandedSections.bh1750}
+                    onToggle={() => toggleSection('bh1750')}
+                    color="bg-green-500"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-medium text-slate-600 mb-1">
@@ -994,7 +1102,7 @@ export default function Settings() {
                         />
                       </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
 
                   {/* Close Disabled Overlay Wrapper */}
                 </div>
@@ -1047,7 +1155,45 @@ export default function Settings() {
       {/* Profile Settings Tab */}
       {
         activeTab === "profile" && (
-          <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+          <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-slate-200">
+            <div className="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center md:text-left">Foto Profil</h3>
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="relative">
+                  <img
+                    src={profileImage}
+                    onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=0D9488&color=fff`; }}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                  />
+                </div>
+                <div className="flex-1 w-full md:w-auto text-center md:text-left">
+                  <div className="flex flex-col gap-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Ganti Foto
+                    </label>
+                    <div className="flex gap-2 justify-center md:justify-start">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 transition-colors"
+                      />
+
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Format: JPG, PNG. Maksimal 2MB.
+                    </p>
+                    {saved && savedType === 'profile_photo' && (
+                      <p className="text-xs text-green-600 font-medium">
+                        ✓ Foto profil berhasil diperbarui
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <form className="space-y-6" onSubmit={handleProfileSubmit}>
               <div className="md:w-2/3">
                 <label className="block text-sm font-semibold text-slate-700 mb-2">

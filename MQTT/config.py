@@ -1,22 +1,32 @@
+import os
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
 # Default Database Configuration
 DB_DEFAULT = {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": "postgres",
-    "user": "postgres",
-    "password": "postgres"
+    "host": os.getenv("DB_HOST", "localhost"),
+    "port": int(os.getenv("DB_PORT", 5432)),
+    "dbname": os.getenv("DB_NAME", "postgres"),
+    "user": os.getenv("DB_USER", "postgres"),
+    "password": os.getenv("DB_PASSWORD", "postgres")
 }
 
 # MQTT Configuration
-MQTT_BROKER = "broker.hivemq.com"
-MQTT_PORT = 1883
+MQTT_BROKER = os.getenv("MQTT_BROKER", "broker.hivemq.com")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 MQTT_TOPICS = {
-    "dht22": "sensor/dht22",
-    "pzem004t": "sensor/pzem004t",
-    "mq2": "sensor/mq2",
-    "bh1750": "sensor/bh1750",
-    "relay": "command/relay/#"
+    "dht22": os.getenv("TOPIC_DHT22", "sensor/dht22"),
+    "pzem004t": os.getenv("TOPIC_PZEM", "sensor/pzem004t"),
+    "mq2": os.getenv("TOPIC_MQ2", "sensor/mq2"),
+    "bh1750": os.getenv("TOPIC_BH1750", "sensor/bh1750"),
+    "relay": os.getenv("TOPIC_RELAY_CMD", "command/relay/#")
 }
+
+# Alert & Settings Configuration
+SETTINGS_RELOAD_INTERVAL = int(os.getenv("SETTINGS_RELOAD_INTERVAL", 5))
+ALERT_COOLDOWN = int(os.getenv("ALERT_COOLDOWN", 60))
 
 # Daftar query untuk membuat tabel di database IoT
 TABLES = {

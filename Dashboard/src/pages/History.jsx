@@ -118,8 +118,9 @@ export default function History() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="space-y-4">
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
@@ -157,6 +158,45 @@ export default function History() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3">
+          {history.length === 0 ? (
+            <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500 shadow-sm">
+              <svg className="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Belum ada riwayat aktivitas
+            </div>
+          ) : (
+            history.map((item, idx) => (
+              <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2 border-l-4" style={{ borderColor: item.statusClass?.includes('text-green') ? '#10b981' : item.statusClass?.includes('text-red') ? '#ef4444' : item.statusClass?.includes('text-yellow') ? '#f59e0b' : '#94a3b8' }}>
+                <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-slate-800 text-sm leading-tight">{item.event}</h3>
+                  <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${item.status.toLowerCase().includes('connect') ? 'bg-green-500' :
+                      item.status.toLowerCase().includes('reconn') ? 'bg-yellow-500' :
+                        item.status.toLowerCase().includes('off') || item.status.toLowerCase().includes('close') ? 'bg-red-500' :
+                          'bg-slate-400'
+                    }`} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${item.statusClass || 'bg-slate-100 text-slate-600'
+                    } bg-opacity-10`}>
+                    Status: {item.status}
+                  </span>
+                </div>
+                <div className="pt-1 flex items-center gap-1.5 text-slate-400">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-[10px] font-medium leading-none">
+                    {item.time}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

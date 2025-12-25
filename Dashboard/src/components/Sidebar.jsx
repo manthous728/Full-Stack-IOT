@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config";
 
 const NAV_ITEMS = [
   {
@@ -20,10 +21,10 @@ const NAV_ITEMS = [
     ],
     viewBox: "0 0 24 24",
     items: [
-      { label: "Suhu & Kelembapan", path: "/sensor/dht22" },
-      { label: "Gas & Asap", path: "/sensor/mq2" },
-      { label: "Daya & Listrik", path: "/sensor/pzem" },
-      { label: "Intensitas Cahaya", path: "/sensor/bh1750" },
+      { label: "Lingkungan", path: "/sensor/dht22", subLabel: "Suhu & Kelembapan" },
+      { label: "Gas & Asap", path: "/sensor/mq2", subLabel: "Kualitas Udara" },
+      { label: "Listrik", path: "/sensor/pzem", subLabel: "Daya & Energi" },
+      { label: "Cahaya", path: "/sensor/bh1750", subLabel: "Intensitas Cahaya" },
     ],
   },
   {
@@ -44,22 +45,31 @@ const NAV_ITEMS = [
     viewBox: "0 0 24 24",
   },
   {
-    id: "nav-setting",
-    label: "Setting",
-    path: "/settings",
+    id: "nav-config",
+    label: "Pengaturan",
+    submenu: true,
+    adminOnly: true,
     icon: [
       "M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4m0 6c-1.08 0-2-.92-2-2s.92-2 2-2 2 .92 2 2-.92 2-2 2",
       "m20.42 13.4-.51-.29c.05-.37.08-.74.08-1.11s-.03-.74-.08-1.11l.51-.29c.96-.55 1.28-1.78.73-2.73l-1-1.73a2.006 2.006 0 0 0-2.73-.73l-.53.31c-.58-.46-1.22-.83-1.9-1.11v-.6c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v.6c-.67.28-1.31.66-1.9 1.11l-.53-.31c-.96-.55-2.18-.22-2.73.73l-1 1.73c-.55.96-.22 2.18.73 2.73l.51.29c-.05.37-.08.74-.08 1.11s.03.74.08 1.11l-.51.29c-.96.55-1.28 1.78-.73 2.73l1 1.73c.55.95 1.77 1.28 2.73.73l.53-.31c.58.46 1.22.83 1.9 1.11v.6c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-.6a8.7 8.7 0 0 0 1.9-1.11l.53.31c.95.55 2.18.22 2.73-.73l1-1.73c.55-.96.22-2.18-.73-2.73m-2.59-2.78c.11.45.17.92.17 1.38s-.06.92-.17 1.38a1 1 0 0 0 .47 1.11l1.12.65-1 1.73-1.14-.66c-.38-.22-.87-.16-1.19.14-.68.65-1.51 1.13-2.38 1.4-.42.13-.71.52-.71.96v1.3h-2v-1.3c0-.44-.29-.83-.71-.96-.88-.27-1.7-.75-2.38-1.4a1.01 1.01 0 0 0-1.19-.15l-1.14.66-1-1.73 1.12-.65c.39-.22.58-.68.47-1.11-.11-.45-.17-.92-.17-1.38s.06-.93.17-1.38A1 1 0 0 0 5.7 9.5l-1.12-.65 1-1.73 1.14.66c.38.22.87.16 1.19-.14.68-.65 1.51-1.13 2.38-1.4.42-.13.71-.52.71-.96v-1.3h2v1.3c0 .44.29.83.71.96.88.27 1.7.75 2.38 1.4.32.31.81.36 1.19.14l1.14-.66 1 1.73-1.12.65c-.39.22-.58.68-.47 1.11Z",
     ],
     viewBox: "0 0 24 24",
-    // adminOnly removed to allow access to Profile tab for all users
+    items: [
+      { label: "Broker MQTT", path: "/settings/broker" },
+      { label: "Threshold Sensor", path: "/settings/threshold" },
+    ],
+  },
+  {
+    id: "nav-profile",
+    label: "Profil User",
+    path: "/profile",
+    icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z",
+    viewBox: "0 0 24 24",
   },
   {
     id: "nav-users",
     label: "Users",
     path: "/users",
-    icon: "M12 4.354a4 4 0 110 5.292 4 4 0 010-5.292zm0 0V2.5a2.5 2.5 0 00-2.5 2.5v1.354M6.735 4.354a4 4 0 110 5.292 4 4 0 010-5.292zm0 0V2.5a2.5 2.5 0 00-2.5 2.5v1.354M17.265 4.354a4 4 0 110 5.292 4 4 0 010-5.292zm0 0V2.5a2.5 2.5 0 00-2.5 2.5v1.354",
-    // Using a simpler icon for Users Group
     icon: "M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
     viewBox: "0 0 24 24",
     adminOnly: true,
@@ -87,8 +97,19 @@ function ProfileSection({ isCollapsed, onClose }) {
         className={`w-full flex items-center gap-3 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors ${isCollapsed ? "md:justify-center" : ""
           }`}
       >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-          {user?.username?.charAt(0).toUpperCase() || "A"}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+          <img
+            src={user?.avatar_url ? `${API_BASE_URL}${user.avatar_url}` : `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=0D9488&color=fff`}
+            alt="Profile"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+          <div className="hidden w-full h-full items-center justify-center">
+            {user?.username?.charAt(0).toUpperCase() || "A"}
+          </div>
         </div>
         <div className={`text-left flex-1 ${isCollapsed ? "md:hidden" : ""}`}>
           <p className="text-sm font-medium text-white truncate">
@@ -157,6 +178,9 @@ export default function Sidebar({
   const location = useLocation();
   const [sensorOpen, setSensorOpen] = useState(() =>
     location.pathname.startsWith("/sensor")
+  );
+  const [configOpen, setConfigOpen] = useState(() =>
+    location.pathname.startsWith("/settings")
   );
   const { isAdmin } = useAuth();
 
@@ -257,7 +281,13 @@ export default function Sidebar({
             return (
               <div key={item.id}>
                 <button
-                  onClick={() => setSensorOpen(!sensorOpen)}
+                  onClick={() => {
+                    if (item.id === 'nav-sensor') {
+                      setSensorOpen(!sensorOpen);
+                    } else if (item.id === 'nav-config') {
+                      setConfigOpen(!configOpen);
+                    }
+                  }}
                   className={`nav-link w-full text-left flex items-center px-4 py-3.5 ${isCollapsed
                     ? "md:justify-center md:px-3 md:py-3"
                     : "md:px-4 md:py-3"
@@ -285,7 +315,7 @@ export default function Sidebar({
                     {item.label}
                   </span>
                   <svg
-                    className={`w-4 h-4 transform transition-transform duration-200 ${sensorOpen ? "rotate-180" : ""
+                    className={`w-4 h-4 transform transition-transform duration-200 ${(item.id === 'nav-sensor' ? sensorOpen : configOpen) ? "rotate-180" : ""
                       } ${isCollapsed ? "md:hidden" : ""}`}
                     fill="none"
                     stroke="currentColor"
@@ -305,7 +335,7 @@ export default function Sidebar({
                   )}
                 </button>
                 <div
-                  className={`pl-8 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-out ${sensorOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+                  className={`pl-8 mt-1 space-y-1 overflow-hidden transition-all duration-200 ease-out ${(item.id === 'nav-sensor' ? sensorOpen : configOpen) ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
                     } ${isCollapsed ? "md:hidden" : ""}`}
                 >
                   {item.items.map((subItem) => (
@@ -314,13 +344,18 @@ export default function Sidebar({
                       to={subItem.path}
                       onClick={onClose}
                       className={({ isActive }) =>
-                        `flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors ${isActive
+                        `flex items-center px-4 py-2.5 rounded-lg text-sm ${isActive
                           ? "bg-teal-500/10 border-l-4 border-teal-500 text-teal-300 font-semibold"
                           : "text-slate-300 hover:bg-slate-800/60 hover:text-slate-50"
                         }`
                       }
                     >
-                      {subItem.label}
+                      <div className="flex flex-col">
+                        <span>{subItem.label}</span>
+                        {subItem.subLabel && (
+                          <span className="text-[10px] opacity-60 font-normal">{subItem.subLabel}</span>
+                        )}
+                      </div>
                     </NavLink>
                   ))}
                 </div>

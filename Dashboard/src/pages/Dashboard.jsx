@@ -144,140 +144,82 @@ export default function Dashboard() {
     return "red";
   }, [isConnected, isReconnecting, reconnectAttempts]);
 
-  const chartData = useMemo(() => {
-    const dht = sensorData.dht22 || { temp: [], hum: [], time: [] };
-
-    const hasData =
-      Array.isArray(dht.time) && dht.time.length > 0 &&
-      Array.isArray(dht.temp) && dht.temp.length > 0 &&
-      Array.isArray(dht.hum) && dht.hum.length > 0;
-
-    if (!hasData) {
-      return {
-        labels: [],
-        datasets: [
-          {
-            label: "Suhu (°C)",
-            data: [],
-            borderColor: "rgb(255, 99, 132)",
-            backgroundColor: "rgba(255, 99, 132, 0.5)",
-            yAxisID: "yTemp",
-            tension: 0.2,
-            pointRadius: 3,
-          },
-          {
-            label: "Kelembaban (%)",
-            data: [],
-            borderColor: "rgb(54, 162, 235)",
-            backgroundColor: "rgba(54, 162, 235, 0.5)",
-            yAxisID: "yHum",
-            tension: 0.2,
-            pointRadius: 3,
-          },
-        ],
-      };
-    }
-
+  const chartTemp = useMemo(() => {
+    const dht = sensorData.dht22 || { temp: [], time: [] };
     return {
-      labels: Array.isArray(dht.time) ? dht.time : [],
-      datasets: [
-        {
-          label: "Suhu (°C)",
-          data: Array.isArray(dht.temp)
-            ? dht.temp.map(Number).filter((n) => !isNaN(n))
-            : [],
-          borderColor: "rgb(255, 99, 132)",
-          backgroundColor: (context) => {
-            const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(255, 99, 132, 0.5)');
-            gradient.addColorStop(1, 'rgba(255, 99, 132, 0.05)');
-            return gradient;
-          },
-          yAxisID: "yTemp",
-          tension: 0.3,
-          pointRadius: 2,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          fill: true
+      labels: dht.time || [],
+      datasets: [{
+        label: "Suhu (°C)",
+        data: (dht.temp || []).map(Number).filter(n => !isNaN(n)),
+        borderColor: "rgb(255, 99, 132)",
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+          gradient.addColorStop(0, 'rgba(255, 99, 132, 0.4)');
+          gradient.addColorStop(1, 'rgba(255, 99, 132, 0.02)');
+          return gradient;
         },
-        {
-          label: "Kelembaban (%)",
-          data: Array.isArray(dht.hum)
-            ? dht.hum.map(Number).filter((n) => !isNaN(n))
-            : [],
-          borderColor: "rgb(54, 162, 235)",
-          backgroundColor: (context) => {
-            const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(54, 162, 235, 0.5)');
-            gradient.addColorStop(1, 'rgba(54, 162, 235, 0.05)');
-            return gradient;
-          },
-          yAxisID: "yHum",
-          tension: 0.3,
-          pointRadius: 2,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          fill: true
-        },
-      ],
+        tension: 0.4,
+        pointRadius: 2,
+        fill: true,
+        cubicInterpolationMode: 'monotone',
+      }]
     };
   }, [sensorData]);
 
-  const chartOptions = useMemo(() => ({
+  const chartHum = useMemo(() => {
+    const dht = sensorData.dht22 || { hum: [], time: [] };
+    return {
+      labels: dht.time || [],
+      datasets: [{
+        label: "Kelembaban (%)",
+        data: (dht.hum || []).map(Number).filter(n => !isNaN(n)),
+        borderColor: "rgb(54, 162, 235)",
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+          gradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)');
+          gradient.addColorStop(1, 'rgba(54, 162, 235, 0.02)');
+          return gradient;
+        },
+        tension: 0.4,
+        pointRadius: 2,
+        fill: true,
+        cubicInterpolationMode: 'monotone',
+      }]
+    };
+  }, [sensorData]);
+
+  const baseOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: {
-      duration: 1000,
-      easing: 'easeOutQuart',
-    },
     plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: { usePointStyle: true },
-        onClick: (e, legendItem, legend) => {
-          const index = legendItem.datasetIndex
-          const ci = legend.chart
-          ci.toggleDataVisibility(index)
-          ci.update()
-        },
-      },
+      legend: { display: false },
       tooltip: {
         mode: 'index',
         intersect: false,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#1e293b',
+        bodyColor: '#475569',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        padding: 8,
+        usePointStyle: true,
       },
     },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false,
-    },
+    interaction: { mode: 'nearest', axis: 'x', intersect: false },
     scales: {
       x: {
-        ticks: {
-          autoSkip: true,
-          maxTicksLimit: 6,
-        },
+        grid: { display: false },
+        ticks: { autoSkip: true, maxTicksLimit: 5, color: '#94a3b8', font: { size: 10 } },
       },
-      yTemp: {
-        type: "linear",
-        display: true,
-        position: "left",
-        title: { display: true, text: "Suhu (°C)" },
-      },
-      yHum: {
-        type: "linear",
-        display: true,
-        position: "right",
-        title: { display: true, text: "Kelembaban (%)" },
-        grid: { drawOnChartArea: false },
-        min: 0,
-        max: 100,
+      y: {
+        grid: { color: '#f1f5f9' },
+        ticks: { color: '#64748b', font: { size: 10 } },
+        beginAtZero: false,
       },
     },
-  }), []);
+  };
 
   // Add loading state for the chart
   const [isChartReady, setIsChartReady] = useState(false);
@@ -376,40 +318,40 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-96 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
-        {!isChartReady || sensorData.dht22.time.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500 mx-auto mb-2"></div>
-              <p className="text-slate-500">Memuat grafik...</p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Temperature Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-slate-800">Suhu Ruangan (DHT22)</h3>
+            <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded">Realtime</span>
           </div>
-        ) : (
-          <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              {/* <svg
-                className="w-6 h-6 text-indigo-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg> */}
-              Grafik Suhu & Kelembaban
-            </h3>
-            {/* <div className="h-70">
-              <Line data={chartData} options={chartOptions} />
-            </div> */}
-            <div style={{ height: 300 }}>
-              <Line data={chartData} options={chartOptions} />
-            </div>
+          <div style={{ height: 260 }}>
+            {!isChartReady || sensorData.dht22.time.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+              </div>
+            ) : (
+              <Line data={chartTemp} options={baseOptions} />
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Humidity Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-slate-800">Kelembaban (DHT22)</h3>
+            <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded">Realtime</span>
+          </div>
+          <div style={{ height: 260 }}>
+            {!isChartReady || sensorData.dht22.time.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <Line data={chartHum} options={baseOptions} />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -143,8 +143,8 @@ export default function SensorMQ2() {
 
   const chartSmoke = useMemo(() => createChartData('Smoke', { border: 'rgb(75, 85, 99)', bg: 'rgba(75, 85, 99, 0.5)', bgFade: 'rgba(75, 85, 99, 0.05)' }, 'smoke', mq2.smoke, historyData.smoke), [mq2, hasData, viewMode, historyData])
 
-  // Simplified chart options for single metrics
-  const singleChartOptions = {
+  // Simple Base Options
+  const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -152,59 +152,32 @@ export default function SensorMQ2() {
       axis: 'x',
       intersect: false,
     },
-    animation: {
-      duration: 800,
-      easing: 'easeOutQuart',
-    },
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         titleColor: '#1e293b',
         bodyColor: '#475569',
         borderColor: '#e2e8f0',
         borderWidth: 1,
-        padding: 10,
-        boxPadding: 4,
+        padding: 8,
         usePointStyle: true,
       },
       zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x',
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'x',
-        },
-        limits: {
-          x: { min: 'original', max: 'original' },
-        },
+        pan: { enabled: true, mode: 'x' },
+        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: {
-          autoSkip: true,
-          maxTicksLimit: 6,
-          color: '#94a3b8'
-        },
+        ticks: { autoSkip: true, maxTicksLimit: 5, color: '#94a3b8', font: { size: 10 } },
       },
       y: {
         grid: { color: '#f1f5f9' },
-        ticks: {
-          color: '#94a3b8'
-        },
+        ticks: { color: '#64748b', font: { size: 10 } },
         beginAtZero: false,
       },
     },
@@ -433,70 +406,60 @@ export default function SensorMQ2() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">
-            {viewMode === 'realtime' ? 'LPG' : 'Grafik Riwayat LPG'}
-          </h3>
-          {viewMode === 'realtime' && (
-            <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded">
-              Min/Max/Avg: 100 data terakhir
-            </span>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* LPG Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">
+              LPG {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
+            </h3>
+          </div>
+          <div style={{ height: 260 }}>
+            {isHistoryLoading && viewMode === 'history' ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            ) : (
+              <Line data={chartLPG} options={baseChartOptions} />
+            )}
+          </div>
         </div>
-        {isHistoryLoading && viewMode === 'history' ? (
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
-          </div>
-        ) : (
-          <div style={{ height: 300 }}>
-            <Line data={chartLPG} options={singleChartOptions} />
-          </div>
-        )}
-      </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">
-            {viewMode === 'realtime' ? 'CO' : 'Grafik Riwayat CO'}
-          </h3>
-          {viewMode === 'realtime' && (
-            <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded">
-              Min/Max/Avg: 100 data terakhir
-            </span>
-          )}
+        {/* CO Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">
+              CO {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
+            </h3>
+          </div>
+          <div style={{ height: 260 }}>
+            {isHistoryLoading && viewMode === 'history' ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+              </div>
+            ) : (
+              <Line data={chartCO} options={baseChartOptions} />
+            )}
+          </div>
         </div>
-        {isHistoryLoading && viewMode === 'history' ? (
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
-          </div>
-        ) : (
-          <div style={{ height: 300 }}>
-            <Line data={chartCO} options={singleChartOptions} />
-          </div>
-        )}
-      </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 chart-container-enter transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">
-            {viewMode === 'realtime' ? 'Smoke' : 'Grafik Riwayat Smoke'}
-          </h3>
-          {viewMode === 'realtime' && (
-            <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded">
-              Min/Max/Avg: 100 data terakhir
-            </span>
-          )}
+        {/* Smoke Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg md:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800">
+              Smoke {viewMode === 'realtime' ? '(Realtime)' : '(Riwayat)'}
+            </h3>
+          </div>
+          <div style={{ height: 260 }}>
+            {isHistoryLoading && viewMode === 'history' ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-slate-500"></div>
+              </div>
+            ) : (
+              <Line data={chartSmoke} options={baseChartOptions} />
+            )}
+          </div>
         </div>
-        {isHistoryLoading && viewMode === 'history' ? (
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
-          </div>
-        ) : (
-          <div style={{ height: 300 }}>
-            <Line data={chartSmoke} options={singleChartOptions} />
-          </div>
-        )}
       </div>
 
       {viewMode === 'realtime' && (

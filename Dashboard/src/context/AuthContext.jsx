@@ -150,6 +150,13 @@ export function AuthProvider({ children }) {
         }
     }
 
+    const updateUserLocal = (newData) => {
+        if (!user) return
+        const updatedUser = { ...user, ...newData }
+        setUser(updatedUser)
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+    }
+
     const isAdminSetup = () => {
         return adminExists === true
     }
@@ -165,7 +172,9 @@ export function AuthProvider({ children }) {
         setupAdmin,
         isAdminSetup,
         checkAdminExists,
-        updateProfile
+        checkAdminExists,
+        updateProfile,
+        updateUserLocal
     }
 
     return (

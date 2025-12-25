@@ -13,7 +13,9 @@ import SensorPZEM from './pages/SensorPZEM'
 import SensorBH1750 from './pages/SensorBH1750'
 import Relay from './pages/Relay'
 import History from './pages/History'
-import Settings from './pages/Settings'
+import BrokerSettings from './pages/BrokerSettings'
+import ThresholdSettings from './pages/ThresholdSettings'
+import ProfileSettings from './pages/ProfileSettings'
 import UserManagement from './pages/UserManagement'
 import './index.css'
 
@@ -38,7 +40,12 @@ function App() {
               <Route path="sensor/bh1750" element={<SensorBH1750 />} />
               <Route path="relay" element={<Relay />} />
               <Route path="history" element={<History />} />
-              <Route path="settings" element={<Settings />} />
+              <Route path="settings">
+                <Route index element={<Navigate to="/settings/broker" replace />} />
+                <Route path="broker" element={<BrokerSettings />} />
+                <Route path="threshold" element={<ThresholdSettings />} />
+              </Route>
+              <Route path="profile" element={<ProfileSettings />} />
               <Route path="users" element={<UserManagement />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

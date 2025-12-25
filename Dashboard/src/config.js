@@ -1,20 +1,20 @@
-export const API_BASE_URL = "http://127.0.0.1:8000";
-// export const MQTT_BROKER_URL = "ws://broker.hivemq.com:8000/mqtt";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 export const MQTT_CONFIG = {
-    host: "broker.hivemq.com",
-    port: 8000,
-    useSSL: false,
-    autoConnect: true,
+    host: import.meta.env.VITE_MQTT_HOST || "broker.hivemq.com",
+    port: parseInt(import.meta.env.VITE_MQTT_PORT) || 8000,
+    useSSL: import.meta.env.VITE_MQTT_USE_SSL === "true",
+    autoConnect: import.meta.env.VITE_AUTO_CONNECT !== "false",
     topics: {
-        dht22: "sensor/dht22",
-        pzem004t: "sensor/pzem004t",
-        mq2: "sensor/mq2",
-        bh1750: "sensor/bh1750",
-        relay_cmd: "command/relay/",
-        relay_status_base: "status/relay/",
+        dht22: import.meta.env.VITE_TOPIC_DHT22 || "sensor/dht22",
+        pzem004t: import.meta.env.VITE_TOPIC_PZEM || "sensor/pzem004t",
+        mq2: import.meta.env.VITE_TOPIC_MQ2 || "sensor/mq2",
+        bh1750: import.meta.env.VITE_TOPIC_BH1750 || "sensor/bh1750",
+        relay_cmd: import.meta.env.VITE_TOPIC_RELAY_CMD || "command/relay/",
+        relay_status_base: import.meta.env.VITE_TOPIC_RELAY_STATUS_BASE || "status/relay/",
     },
-    updateInterval: 5,
+    updateInterval: parseInt(import.meta.env.VITE_UPDATE_INTERVAL) || 5,
+    maxDataPoints: parseInt(import.meta.env.VITE_MAX_DATA_POINTS) || 50,
     thresholds: {
         dht22: {
             tempMax: 35,

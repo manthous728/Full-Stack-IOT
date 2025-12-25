@@ -135,8 +135,8 @@ export default function SensorBH1750() {
     }
   }, [luxData, hasData, viewMode, historyData])
 
-  // Simplified chart options for single metric (unchanged)
-  const singleChartOptions = {
+  // Simple Base Options
+  const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -144,57 +144,32 @@ export default function SensorBH1750() {
       axis: 'x',
       intersect: false,
     },
-    animation: {
-      duration: 800,
-      easing: 'easeOutQuart',
-    },
     plugins: {
-      legend: {
-        display: false, // Hide legend for single metric chart
-      },
+      legend: { display: false },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         titleColor: '#1e293b',
         bodyColor: '#475569',
         borderColor: '#e2e8f0',
         borderWidth: 1,
-        padding: 10,
-        boxPadding: 4,
+        padding: 8,
         usePointStyle: true,
       },
       zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x',
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'x',
-        },
-        limits: {
-          x: { min: 'original', max: 'original' },
-        },
+        pan: { enabled: true, mode: 'x' },
+        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: {
-          autoSkip: true,
-          maxTicksLimit: 6,
-          color: '#94a3b8'
-        },
+        ticks: { autoSkip: true, maxTicksLimit: 5, color: '#94a3b8', font: { size: 10 } },
       },
       y: {
         grid: { color: '#f1f5f9' },
-        ticks: { color: '#94a3b8' },
+        ticks: { color: '#64748b', font: { size: 10 } },
         beginAtZero: false,
       },
     },
@@ -448,12 +423,12 @@ export default function SensorBH1750() {
         </div>
 
         {isHistoryLoading && viewMode === 'history' ? (
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+          <div className="h-[260px] flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
           </div>
         ) : (
-          <div style={{ height: 300 }}>
-            <Line data={chartLux} options={singleChartOptions} />
+          <div style={{ height: 260 }}>
+            <Line data={chartLux} options={baseChartOptions} />
           </div>
         )}
       </div>

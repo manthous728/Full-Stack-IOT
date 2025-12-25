@@ -189,71 +189,134 @@ export default function UserManagement() {
             ) : error ? (
                 <div className="bg-red-50 p-4 rounded-lg text-red-700">{error}</div>
             ) : (
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Username</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Dibuat</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
-                            {users.map((u) => (
-                                <tr key={u.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">#{u.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{u.username}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                <div className="space-y-4">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Username</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Dibuat</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-200">
+                                {users.map((u) => (
+                                    <tr key={u.id} className="hover:bg-slate-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">#{u.id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{u.username}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                                                {u.role.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.is_active ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>
+                                                {u.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {new Date(u.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end gap-3">
+                                                {u.id !== 1 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openResetModal(u.id, u.username)}
+                                                        className="px-3 py-1 text-amber-600 hover:text-amber-900 hover:bg-amber-50 rounded transition-colors"
+                                                        title="Reset Password"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                ) : (
+                                                    <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="Password Admin Utama tidak dapat di-reset">
+                                                        Reset
+                                                    </span>
+                                                )}
+                                                {u.id !== 1 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openDeleteModal(u.id)}
+                                                        className="px-3 py-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
+                                                    >
+                                                        Hapus
+                                                    </button>
+                                                ) : (
+                                                    <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="User utama tidak dapat dihapus">
+                                                        Hapus
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden grid grid-cols-1 gap-4">
+                        {users.map((u) => (
+                            <div key={u.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900">{u.username}</h3>
+                                        <p className="text-xs text-slate-400 mt-0.5">ID User: #{u.id}</p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
                                             {u.role.toUpperCase()}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.is_active ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${u.is_active ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>
                                             {u.is_active ? 'Active' : 'Inactive'}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                        {new Date(u.created_at).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end gap-3">
-                                            {u.id !== 1 ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openResetModal(u.id, u.username)}
-                                                    className="px-3 py-1 text-amber-600 hover:text-amber-900 hover:bg-amber-50 rounded transition-colors"
-                                                    title="Reset Password"
-                                                >
-                                                    Reset
-                                                </button>
-                                            ) : (
-                                                <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="Password Admin Utama tidak dapat di-reset">
-                                                    Reset
-                                                </span>
-                                            )}
-                                            {u.id !== 1 ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openDeleteModal(u.id)}
-                                                    className="px-3 py-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
-                                                >
-                                                    Hapus
-                                                </button>
-                                            ) : (
-                                                <span className="px-3 py-1 text-slate-300 cursor-not-allowed" title="User utama tidak dapat dihapus">
-                                                    Hapus
-                                                </span>
-                                            )}
+                                    </div>
+                                </div>
+
+                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                                    <span>Dibuat: {new Date(u.created_at).toLocaleDateString()}</span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 pt-2">
+                                    {u.id !== 1 ? (
+                                        <button
+                                            onClick={() => openResetModal(u.id, u.username)}
+                                            className="flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-50 text-amber-700 rounded-lg text-sm font-bold border border-amber-100 active:bg-amber-100 transition-colors"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-1.114 3.796M15 7a2 2 0 00-1.114-1.5m4 4.5A2 2 0 0019 9a2 2 0 00-2 2M15 7a2 2 0 00-1.114 1.5M13 3v2m0 0a2 2 0 01-2-2m2 2a2 2 0 002-2m-2 2l-2-2m2 2l2-2" />
+                                            </svg>
+                                            Reset
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100 opacity-60">
+                                            Admin Utama
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                    )}
+
+                                    {u.id !== 1 ? (
+                                        <button
+                                            onClick={() => openDeleteModal(u.id)}
+                                            className="flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 text-red-700 rounded-lg text-sm font-bold border border-red-100 active:bg-red-100 transition-colors"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center justify-center py-2.5 px-4 bg-slate-50 text-slate-400 rounded-lg text-sm font-bold border border-slate-100 opacity-60">
+                                            LOCKED
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
